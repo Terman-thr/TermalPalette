@@ -269,7 +269,7 @@ const TerminalTabs = () => {
             )}
           </div>
         </aside>
-        <div className="relative flex flex-1 overflow-hidden p-3">
+        <div className="relative flex flex-1 overflow-hidden">
           {tabs.map((tab) => (
             <div
               key={tab.id}
