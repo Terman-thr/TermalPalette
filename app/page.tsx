@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const TerminalDemo = dynamic(() => import("../components/TerminalDemo"), {
+const TerminalTabs = dynamic(() => import("../components/TerminalTabs"), {
   ssr: false,
 });
 
@@ -19,7 +19,7 @@ export default function HomePage() {
             </p>
           </header>
           <div className="mt-6 flex min-h-0 flex-1">
-            <TerminalDemo />
+            <TerminalTabs />
           </div>
         </section>
         <section className="flex min-h-0 flex-col rounded-3xl border border-white/10 bg-panel/90 p-8 shadow-glow backdrop-blur">

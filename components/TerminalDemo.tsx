@@ -429,13 +429,24 @@ const TerminalDemo = () => {
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
 
-    let rafId: number | null = null;
+    let disposed = false;
+    let hasOpened = false;
+    let openAttempts = 0;
+    let openFrame: number | null = null;
+    let fitFrame: number | null = null;
+    let resizeObserver: ResizeObserver | undefined;
+    let shell: PseudoShell | null = null;
+
     const scheduleFit = () => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
+      if (disposed || !hasOpened) {
+        return;
       }
-      rafId = window.requestAnimationFrame(() => {
-        if (!term.element) {
+      if (fitFrame !== null) {
+        cancelAnimationFrame(fitFrame);
+      }
+      fitFrame = window.requestAnimationFrame(() => {
+        fitFrame = null;
+        if (disposed || !term.element) {
           return;
         }
         try {
@@ -446,33 +457,66 @@ const TerminalDemo = () => {
       });
     };
 
-    term.open(container);
-    scheduleFit();
-    term.focus();
+    const performOpen = () => {
+      openFrame = null;
+      if (disposed || hasOpened) {
+        return;
+      }
+      if (!container.isConnected) {
+        scheduleOpen();
+        return;
+      }
 
-    const shell = new PseudoShell(term);
-    shellRef.current = shell;
-    shell.init();
+      try {
+        term.open(container);
+        hasOpened = true;
+      } catch {
+        openAttempts += 1;
+        if (openAttempts >= 5) {
+          return;
+        }
+        scheduleOpen();
+        return;
+      }
 
-    const handleResize = () => {
       scheduleFit();
+      term.focus();
+
+      shell = new PseudoShell(term);
+      shellRef.current = shell;
+      shell.init();
+
+      window.addEventListener("resize", scheduleFit);
+
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(() => scheduleFit());
+        resizeObserver.observe(container);
+      }
     };
 
-    window.addEventListener("resize", handleResize);
+    const scheduleOpen = () => {
+      if (disposed || hasOpened) {
+        return;
+      }
+      if (openFrame !== null) {
+        cancelAnimationFrame(openFrame);
+      }
+      openFrame = window.requestAnimationFrame(performOpen);
+    };
 
-    let resizeObserver: ResizeObserver | undefined;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => scheduleFit());
-      resizeObserver.observe(container);
-    }
+    scheduleOpen();
 
     return () => {
-      shellRef.current?.dispose();
+      disposed = true;
+      shell?.dispose();
       shellRef.current = null;
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", scheduleFit);
       resizeObserver?.disconnect();
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
+      if (openFrame !== null) {
+        cancelAnimationFrame(openFrame);
+      }
+      if (fitFrame !== null) {
+        cancelAnimationFrame(fitFrame);
       }
       fitAddon.dispose();
       term.reset();
