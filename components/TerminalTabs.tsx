@@ -1,15 +1,26 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-const TerminalPanel = dynamic(() => import("./TerminalDemo"), {
-  ssr: false,
-});
+import type { TerminalDemoProps } from "./TerminalDemo";
+import {
+  DEFAULT_THEME_ID,
+  TERMINAL_THEMES,
+  type TerminalThemeId,
+} from "./terminalThemes";
+
+const TerminalPanel = dynamic<TerminalDemoProps>(
+  () => import("./TerminalDemo"),
+  {
+    ssr: false,
+  }
+);
 
 type TerminalTab = {
   id: number;
   name: string;
+  themeId: TerminalThemeId;
 };
 
 const buildDefaultName = (index: number) => `Terminal ${index}`;
@@ -19,23 +30,29 @@ const TerminalTabs = () => {
     {
       id: 1,
       name: buildDefaultName(1),
+      themeId: DEFAULT_THEME_ID,
     },
   ]);
   const [activeId, setActiveId] = useState<number>(1);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draftName, setDraftName] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const idCounter = useRef(2);
 
   const handleAddTab = () => {
     setTabs((prev) => {
       const nextId = idCounter.current++;
       const nextName = buildDefaultName(prev.length + 1);
-      const nextTabs = [...prev, { id: nextId, name: nextName }];
+      const nextTabs = [
+        ...prev,
+        { id: nextId, name: nextName, themeId: DEFAULT_THEME_ID },
+      ];
       setActiveId(nextId);
       return nextTabs;
     });
     setEditingId(null);
     setDraftName("");
+    setSearchTerm("");
   };
 
   const handleCloseTab = (id: number) => {
@@ -101,6 +118,35 @@ const TerminalTabs = () => {
   const cancelRename = () => {
     setEditingId(null);
     setDraftName("");
+  };
+
+  const activeTab = tabs.find((tab) => tab.id === activeId);
+  const activeThemeId = activeTab?.themeId ?? DEFAULT_THEME_ID;
+
+  const filteredThemes = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) {
+      return TERMINAL_THEMES;
+    }
+    return TERMINAL_THEMES.filter((theme) =>
+      theme.label.toLowerCase().includes(query)
+    );
+  }, [searchTerm]);
+
+  const handleThemeSelect = (themeId: TerminalThemeId) => {
+    if (!activeTab) {
+      return;
+    }
+    setTabs((prev) =>
+      prev.map((tab) =>
+        tab.id === activeTab.id
+          ? {
+              ...tab,
+              themeId,
+            }
+          : tab
+      )
+    );
   };
 
   return (
@@ -184,7 +230,46 @@ const TerminalTabs = () => {
         </button>
       </div>
       <div className="flex min-h-0 flex-1 bg-[#0b1220]">
-        <div className="relative flex h-full w-full overflow-hidden">
+        <aside className="flex w-64 min-w-[16rem] flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
+          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            Theme
+          </label>
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search themes"
+            className="mt-2 w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <div className="mt-3 flex-1 overflow-y-auto pr-1">
+            {filteredThemes.length === 0 ? (
+              <p className="px-1 text-xs text-muted">No themes found</p>
+            ) : (
+              filteredThemes.map((theme) => {
+                const isSelected = theme.id === activeThemeId;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => handleThemeSelect(theme.id)}
+                    className={`mt-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition ${
+                      isSelected
+                        ? "bg-accent/20 text-slate-50"
+                        : "text-muted hover:bg-slate-800/70 hover:text-slate-100"
+                    }`}
+                  >
+                    <span className="truncate">{theme.label}</span>
+                    {isSelected ? (
+                      <span className="text-xs font-semibold text-accent">
+                        Active
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </aside>
+        <div className="relative flex flex-1 overflow-hidden p-3">
           {tabs.map((tab) => (
             <div
               key={tab.id}
@@ -194,7 +279,7 @@ const TerminalTabs = () => {
                   : "hidden h-full w-full"
               }
             >
-              <TerminalPanel />
+              <TerminalPanel themeId={tab.themeId} />
             </div>
           ))}
         </div>

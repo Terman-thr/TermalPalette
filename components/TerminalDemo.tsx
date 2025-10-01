@@ -2,123 +2,47 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Terminal } from "xterm";
-import type { ITheme } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
-type ThemeConfig = {
-  name: string;
-  promptUser: string;
-  promptHost: string;
-  promptPath: string;
-  promptSuffix: string;
-  theme: ITheme;
-};
-
-const themeCycle: ThemeConfig[] = [
-  {
-    name: "moonlight",
-    promptUser: "\u001b[38;5;117m",
-    promptHost: "\u001b[38;5;215m",
-    promptPath: "\u001b[38;5;81m",
-    promptSuffix: "\u001b[38;5;189m%\u001b[0m ",
-    theme: {
-      background: "#0b1220",
-      foreground: "#c0caf5",
-      cursor: "#89ddff",
-      black: "#15161e",
-      red: "#f7768e",
-      green: "#9ece6a",
-      yellow: "#e0af68",
-      blue: "#7aa2f7",
-      magenta: "#bb9af7",
-      cyan: "#7dcfff",
-      white: "#a9b1d6",
-      brightBlack: "#414868",
-      brightRed: "#f7768e",
-      brightGreen: "#9ece6a",
-      brightYellow: "#e0af68",
-      brightBlue: "#7aa2f7",
-      brightMagenta: "#bb9af7",
-      brightCyan: "#7dcfff",
-      brightWhite: "#c0caf5",
-    },
-  },
-  {
-    name: "aurora",
-    promptUser: "\u001b[38;5;120m",
-    promptHost: "\u001b[38;5;208m",
-    promptPath: "\u001b[38;5;49m",
-    promptSuffix: "\u001b[38;5;223m%\u001b[0m ",
-    theme: {
-      background: "#09111c",
-      foreground: "#d8f3ff",
-      cursor: "#66fbd1",
-      black: "#0f172a",
-      red: "#fb7185",
-      green: "#34d399",
-      yellow: "#facc15",
-      blue: "#60a5fa",
-      magenta: "#a855f7",
-      cyan: "#22d3ee",
-      white: "#e2e8f0",
-      brightBlack: "#1f2937",
-      brightRed: "#f43f5e",
-      brightGreen: "#10b981",
-      brightYellow: "#fbbf24",
-      brightBlue: "#3b82f6",
-      brightMagenta: "#c084fc",
-      brightCyan: "#06b6d4",
-      brightWhite: "#f8fafc",
-    },
-  },
-  {
-    name: "matrix",
-    promptUser: "\u001b[38;5;118m",
-    promptHost: "\u001b[38;5;41m",
-    promptPath: "\u001b[38;5;48m",
-    promptSuffix: "\u001b[38;5;46m$\u001b[0m ",
-    theme: {
-      background: "#020b06",
-      foreground: "#b9fbc0",
-      cursor: "#5efc8d",
-      black: "#012b0b",
-      red: "#ff6f91",
-      green: "#69f0ae",
-      yellow: "#ffee58",
-      blue: "#4dd0e1",
-      magenta: "#ce93d8",
-      cyan: "#80deea",
-      white: "#f4fff8",
-      brightBlack: "#1b4332",
-      brightRed: "#ff4d6d",
-      brightGreen: "#8cffda",
-      brightYellow: "#f4ff81",
-      brightBlue: "#84ffff",
-      brightMagenta: "#da9ff9",
-      brightCyan: "#a7ffeb",
-      brightWhite: "#ffffff",
-    },
-  },
-];
+import {
+  DEFAULT_THEME_ID,
+  TERMINAL_THEMES,
+  getThemeById,
+  getThemeIndex,
+  type PromptComponentConfig,
+  type TerminalThemeId,
+  type TerminalThemeConfig,
+  isThemeId,
+} from "./terminalThemes";
 
 class PseudoShell {
   private readonly term: Terminal;
   private input = "";
   private history: string[] = [];
   private historyIndex = 0;
-  private themeIndex = 0;
+  private themeId: TerminalThemeId;
+  private themeIndex: number;
   private disposables: Array<() => void> = [];
   private inVim = false;
   private vimCommandMode = false;
   private vimCommandBuffer = "";
+  private readonly promptContext = {
+    user: "demo",
+    host: "frontend",
+    cwd: "~/playground",
+    fullPath: "/Users/demo/playground",
+    gitBranch: "main",
+  };
 
-  constructor(term: Terminal) {
+  constructor(term: Terminal, initialThemeId: TerminalThemeId = DEFAULT_THEME_ID) {
     this.term = term;
+    this.themeId = initialThemeId;
+    this.themeIndex = getThemeIndex(initialThemeId);
   }
 
   init() {
-    this.applyTheme();
+    this.setTheme(this.themeId, { silent: true });
     this.term.write("\u001b[H\u001b[2J");
     this.term.writeln(
       "\u001b[38;5;117mWelcome to the browser-based oh-my-zsh demo!\u001b[0m"
@@ -142,24 +66,68 @@ class PseudoShell {
     this.disposables = [];
   }
 
-  private currentTheme(): ThemeConfig {
-    return themeCycle[this.themeIndex];
+  private currentTheme(): TerminalThemeConfig {
+    return getThemeById(this.themeId);
   }
 
-  private applyTheme() {
-    this.term.options.theme = this.currentTheme().theme;
+  private applyTheme(theme?: TerminalThemeConfig) {
+    const next = theme ?? this.currentTheme();
+    this.term.options.theme = next.theme;
   }
 
   private buildPrompt(): string {
     const theme = this.currentTheme();
-    const git = "\u001b[38;5;171m(main)\u001b[0m";
-    return (
-      `${theme.promptUser}demo\u001b[0m` +
-      `${theme.promptHost}@frontend\u001b[0m ` +
-      `${theme.promptPath}~/playground\u001b[0m ` +
-      `${git} ` +
-      theme.promptSuffix
-    );
+    const segments = theme.promptComponents
+      .map((component) => this.renderComponent(component))
+      .join("");
+    return `${segments}${theme.promptSuffix}`;
+  }
+
+  setTheme(themeId: TerminalThemeId, options?: { silent?: boolean }) {
+    const theme = getThemeById(themeId);
+    this.themeId = theme.id;
+    this.themeIndex = getThemeIndex(theme.id);
+    this.applyTheme(theme);
+    if (!options?.silent) {
+      this.term.writeln(
+        `Switched to \u001b[38;5;81m${theme.label}\u001b[0m theme.`
+      );
+    }
+  }
+
+  private renderComponent(component: PromptComponentConfig): string {
+    const value = this.getComponentValue(component.type);
+    if (!value) {
+      return "";
+    }
+    const prefix = component.prefix ?? "";
+    const suffix = component.suffix ?? "";
+    return `${prefix}${component.color}${value}\u001b[0m${suffix}`;
+  }
+
+  private getComponentValue(type: PromptComponentConfig["type"]): string {
+    switch (type) {
+      case "user":
+        return this.promptContext.user;
+      case "host":
+        return this.promptContext.host;
+      case "cwd":
+        return this.promptContext.cwd;
+      case "fullPath":
+        return this.promptContext.fullPath;
+      case "git":
+        return this.promptContext.gitBranch;
+      case "time": {
+        const now = new Date();
+        return now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      }
+      default:
+        return "";
+    }
   }
 
   private prompt(newLine = true) {
@@ -280,10 +248,11 @@ class PseudoShell {
   }
 
   private cycleTheme() {
-    this.themeIndex = (this.themeIndex + 1) % themeCycle.length;
-    this.applyTheme();
+    this.themeIndex = (this.themeIndex + 1) % TERMINAL_THEMES.length;
+    const nextTheme = TERMINAL_THEMES[this.themeIndex];
+    this.setTheme(nextTheme.id, { silent: true });
     this.term.writeln(
-      `Switched to \u001b[38;5;81m${this.currentTheme().name}\u001b[0m theme.`
+      `Switched to \u001b[38;5;81m${nextTheme.label}\u001b[0m theme.`
     );
   }
 
@@ -312,7 +281,16 @@ class PseudoShell {
         this.prompt(false);
         return;
       case "theme":
-        this.cycleTheme();
+        if (rest[0]) {
+          const desired = rest[0].toLowerCase();
+          if (isThemeId(desired)) {
+            this.setTheme(desired);
+          } else {
+            this.term.writeln(`Unknown theme: ${desired}`);
+          }
+        } else {
+          this.cycleTheme();
+        }
         break;
       case "vim":
         this.launchVim(rest[0]);
@@ -397,10 +375,23 @@ class PseudoShell {
   }
 }
 
-const TerminalDemo = () => {
+export type TerminalDemoProps = {
+  themeId: TerminalThemeId;
+};
+
+const TerminalDemo = ({ themeId }: TerminalDemoProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<PseudoShell | null>(null);
   const [term, setTerm] = useState<Terminal | null>(null);
+  const latestThemeIdRef = useRef<TerminalThemeId>(themeId);
+
+  useEffect(() => {
+    latestThemeIdRef.current = themeId;
+    const shell = shellRef.current;
+    if (shell) {
+      shell.setTheme(themeId, { silent: true });
+    }
+  }, [themeId]);
 
   useEffect(() => {
     const terminal = new Terminal({
@@ -482,7 +473,7 @@ const TerminalDemo = () => {
       scheduleFit();
       term.focus();
 
-      shell = new PseudoShell(term);
+      shell = new PseudoShell(term, latestThemeIdRef.current);
       shellRef.current = shell;
       shell.init();
 
