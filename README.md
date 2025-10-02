@@ -19,6 +19,12 @@ npm run dev
 
 Then open `http://localhost:3000` to try the terminal. Use `help` inside the terminal to see the available commands and hints.
 
+## Deploy to GitHub Pages
+1. Export the site: `npm run export`. This writes a static build to `out/`.
+2. When deploying to `username.github.io/reponame`, build with `NEXT_PUBLIC_GITHUB_PAGES_PATH=reponame npm run export` so the exported assets are prefixed correctly.
+3. Publish the contents of `out/` to your GitHub Pages branch (e.g. `gh-pages`) and enable Pages in your repository settings.
+4. For Automation, configure a GitHub Action that sets `NEXT_PUBLIC_GITHUB_PAGES_PATH`, runs `npm ci && npm run export`, and pushes the `out/` folder to the Pages branch.
+
 ## Project layout
 - `app/` – Next.js app router pages and global styles.
 - `components/TerminalDemo.tsx` – xterm.js setup and the pseudo shell implementation.
