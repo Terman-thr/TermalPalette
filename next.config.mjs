@@ -1,19 +1,16 @@
 /** @type {import('next').NextConfig} */
 const repoName = process.env.NEXT_PUBLIC_GITHUB_PAGES_PATH;
-
-const basePath = repoName ? `/${repoName}` : undefined;
+const useCustomDomain = true; // force true for haorantang.dev
 
 const nextConfig = {
   reactStrictMode: true,
   output: "export",
-  images: {
-    unoptimized: true,
-  },
+  images: { unoptimized: true },
   trailingSlash: true,
-  ...(basePath
+  ...(repoName && !useCustomDomain
     ? {
-        basePath,
-        assetPrefix: basePath,
+        basePath: `/${repoName}`,
+        assetPrefix: `/${repoName}`,
       }
     : {}),
 };
