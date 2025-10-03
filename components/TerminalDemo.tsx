@@ -83,15 +83,33 @@ class PseudoShell {
     return `${segments}${theme.promptSuffix}`;
   }
 
-  setTheme(themeId: TerminalThemeId, options?: { silent?: boolean }) {
+  setTheme(
+    themeId: TerminalThemeId,
+    options?: { silent?: boolean; clear?: boolean; prompt?: boolean }
+  ) {
     const theme = getThemeById(themeId);
     this.themeId = theme.id;
     this.themeIndex = getThemeIndex(theme.id);
     this.applyTheme(theme);
+    if (options?.clear) {
+      this.resetViewport({ prompt: options?.prompt ?? false });
+    }
     if (!options?.silent) {
       this.term.writeln(
         `Switched to \u001b[38;5;81m${theme.label}\u001b[0m theme.`
       );
+    }
+  }
+
+  private resetViewport(options?: { prompt?: boolean }) {
+    this.input = "";
+    this.inVim = false;
+    this.vimCommandMode = false;
+    this.vimCommandBuffer = "";
+    this.term.write("\u001b[3J\u001b[H\u001b[2J");
+    this.term.clear();
+    if (options?.prompt) {
+      this.prompt(false);
     }
   }
 
@@ -250,7 +268,7 @@ class PseudoShell {
   private cycleTheme() {
     this.themeIndex = (this.themeIndex + 1) % TERMINAL_THEMES.length;
     const nextTheme = TERMINAL_THEMES[this.themeIndex];
-    this.setTheme(nextTheme.id, { silent: true });
+    this.setTheme(nextTheme.id, { silent: true, clear: true });
     this.term.writeln(
       `Switched to \u001b[38;5;81m${nextTheme.label}\u001b[0m theme.`
     );
@@ -284,7 +302,7 @@ class PseudoShell {
         if (rest[0]) {
           const desired = rest[0].toLowerCase();
           if (isThemeId(desired)) {
-            this.setTheme(desired);
+            this.setTheme(desired, { clear: true });
           } else {
             this.term.writeln(`Unknown theme: ${desired}`);
           }
@@ -389,7 +407,7 @@ const TerminalDemo = ({ themeId }: TerminalDemoProps) => {
     latestThemeIdRef.current = themeId;
     const shell = shellRef.current;
     if (shell) {
-      shell.setTheme(themeId, { silent: true });
+      shell.setTheme(themeId, { silent: true, clear: true, prompt: true });
     }
   }, [themeId]);
 
