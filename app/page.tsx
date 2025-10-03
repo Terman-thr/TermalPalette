@@ -11,12 +11,8 @@ export default function HomePage() {
         <section className="flex min-h-[32rem] flex-col rounded-3xl border border-white/10 bg-panel/95 p-8 shadow-glow backdrop-blur">
           <header className="space-y-3">
             <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-              Pure Frontend Terminal
+              Terminal
             </h1>
-            <p className="max-w-xl text-sm text-muted lg:text-base">
-              Demo of an oh-my-zsh inspired prompt with a simulated vim command,
-              rendered entirely in the browser via xterm.js.
-            </p>
           </header>
           <div className="mt-6 flex min-h-0 flex-1">
             <TerminalTabs />
@@ -39,11 +35,6 @@ export default function HomePage() {
                 <code className="font-mono text-accent">theme</code> – change the prompt accent colour.
               </li>
             </ul>
-            <p className="text-sm text-muted">
-              This is a frontend-only playground. The prompt aesthetics mimic
-              oh-my-zsh, while command handling is powered by a lightweight
-              JavaScript shell stub.
-            </p>
           </div>
           <div className="mt-auto pt-6 text-xs text-muted/70">
             Best experienced on desktop-sized viewports.
