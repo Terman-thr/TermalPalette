@@ -21,9 +21,9 @@ Then open `http://localhost:3000` to try the terminal. Use `help` inside the ter
 
 ## Deploy to GitHub Pages
 1. Export the site: `npm run export`. This writes a static build to `out/`.
-2. When deploying to `username.github.io/reponame`, build with `NEXT_PUBLIC_GITHUB_PAGES_PATH=reponame npm run export` so the exported assets are prefixed correctly.
-3. Publish the contents of `out/` to your GitHub Pages branch (e.g. `gh-pages`) and enable Pages in your repository settings.
-4. For Automation, configure a GitHub Action that sets `NEXT_PUBLIC_GITHUB_PAGES_PATH`, runs `npm ci && npm run export`, and pushes the `out/` folder to the Pages branch.
+2. When deploying to `username.github.io/reponame`, build with `NEXT_PUBLIC_GITHUB_PAGES_PATH=reponame npm run export` so the exported assets are prefixed correctly. For a custom domain (e.g. `haorantang.dev`), omit the variable so the app exports to the root.
+3. Publish the contents of `out/` to your GitHub Pages branch (e.g. `gh-pages`) and enable Pages in your repository settings. The build now includes `CNAME` and `.nojekyll`; keep both files in the branch so GitHub serves the `_next/` assets and honours the custom domain.
+4. For automation, configure a GitHub Action that sets `NEXT_PUBLIC_GITHUB_PAGES_PATH` only for path-based deployments, runs `npm ci && npm run export`, and pushes the `out/` folder (including `CNAME` and `.nojekyll`) to the Pages branch.
 
 ## Project layout
 - `app/` – Next.js app router pages and global styles.
