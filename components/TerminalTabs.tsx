@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo, useRef, useState } from "react";
 
-import type { TerminalDemoProps } from "./TerminalDemo";
+import type { TerminalWorkspaceProps } from "./TerminalWorkspace";
 import ThemeEditor from "./ThemeEditor";
 import {
   DEFAULT_THEME_ID,
@@ -15,8 +15,8 @@ import {
   type PromptComponentConfig,
 } from "./terminalThemes";
 
-const TerminalPanel = dynamic<TerminalDemoProps>(
-  () => import("./TerminalDemo"),
+const TerminalPanel = dynamic<TerminalWorkspaceProps>(
+  () => import("./TerminalWorkspace"),
   {
     ssr: false,
   }
@@ -114,7 +114,7 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
   const prompt = segments.join("");
 
   const lines: string[] = [
-    `# oh-my-zsh theme exported from the CS465 terminal demo`,
+    `# oh-my-zsh theme exported from the CS465 terminal workspace`,
     `# Theme: ${theme.label}`,
     "autoload -U colors && colors",
     "setopt prompt_subst",

@@ -172,10 +172,10 @@ const slugify = (value: string) =>
     .replace(/^-+|-+$/g, "");
 
 const PREVIEW_CONTEXT = {
-  user: "demo",
+  user: "builder",
   host: "frontend",
   cwd: "~/playground",
-  fullPath: "/Users/demo/playground",
+  fullPath: "/Users/builder/playground",
   git: "main",
   time: "14:32",
 };
@@ -328,191 +328,190 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 px-4 py-8 backdrop-blur">
-      <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-accent/30 bg-slate-900/95 p-6 shadow-2xl">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-semibold text-slate-50">
-              Theme editor
-            </h2>
-            <p className="text-sm text-muted">
-              Start from the active theme, add or remove prompt components, pick
-              colors, and bring in your favorite emoji. The preview updates as
-              you edit.
-            </p>
-          </div>
-          <label className="text-sm font-medium text-slate-200">
-            Theme name
-            <input
-              value={themeName}
-              onChange={(event) => setThemeName(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-base text-slate-50 placeholder:text-muted focus:border-accent focus:outline-none"
-              placeholder="Give your theme a memorable name"
-            />
-          </label>
-          <div className="space-y-6">
-            <div className="sticky top-4 z-20">
-              <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-5 shadow-xl backdrop-blur">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h3 className="text-xl font-semibold text-slate-50">
-                    Prompt preview
-                  </h3>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-                    Live view
-                  </span>
-                </div>
-                <div
-                  className="mt-4 overflow-hidden rounded-2xl border border-slate-800"
-                  style={{
-                    background: palette.background,
-                  }}
-                >
-                  <div className="bg-black/30 px-6 py-5">
-                    <div
-                      className="font-mono text-lg leading-relaxed md:text-xl"
-                      style={{ color: palette.foreground }}
-                    >
-                      {previewComponents.map((component) => (
-                        <span
-                          key={component.id}
-                          style={{ color: component.hexColor }}
-                        >
-                          {component.prefix}
-                          {getPreviewValue(component)}
-                          {component.suffix}
-                        </span>
-                      ))}
-                      <span style={{ color: suffixHex, marginLeft: 6 }}>
-                        {suffixText}
+      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-accent/30 bg-slate-900/95 shadow-2xl">
+        <div className="border-b border-white/10 bg-slate-900/98 px-6 py-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold text-slate-50">
+                Theme editor
+              </h2>
+            </div>
+            <label className="text-sm font-medium text-slate-200">
+              Theme name
+              <input
+                value={themeName}
+                onChange={(event) => setThemeName(event.target.value)}
+                className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-base text-slate-50 placeholder:text-muted focus:border-accent focus:outline-none"
+                placeholder="Give your theme a memorable name"
+              />
+            </label>
+            <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-5 shadow-xl backdrop-blur">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-xl font-semibold text-slate-50">
+                  Prompt preview
+                </h3>
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                  Live view
+                </span>
+              </div>
+              <div
+                className="mt-4 overflow-hidden rounded-2xl border border-slate-800"
+                style={{ background: palette.background }}
+              >
+                <div className="bg-black/30 px-6 py-5">
+                  <div
+                    className="font-mono text-lg leading-relaxed md:text-xl"
+                    style={{ color: palette.foreground }}
+                  >
+                    {previewComponents.map((component) => (
+                      <span
+                        key={component.id}
+                        style={{ color: component.hexColor }}
+                      >
+                        {component.prefix}
+                        {getPreviewValue(component)}
+                        {component.suffix}
                       </span>
-                    </div>
+                    ))}
+                    <span style={{ color: suffixHex, marginLeft: 6 }}>
+                      {suffixText}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-slate-100">
+                Prompt components
+              </h3>
+              <div className="h-px flex-1 bg-white/15" />
+              <button
+                type="button"
+                onClick={handleAddComponent}
+                className="rounded-md border border-accent/40 px-3 py-1.5 text-sm font-medium text-accent transition hover:bg-accent/10"
+              >
+                Add component
+              </button>
+            </div>
             <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-100">
-                    Prompt components
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleAddComponent}
-                    className="rounded-md border border-accent/40 px-3 py-1.5 text-sm font-medium text-accent transition hover:bg-accent/10"
-                  >
-                    Add component
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {components.map((component, index) => (
-                    <div
-                      key={component.id}
-                      className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                    >
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <select
-                            value={component.type}
-                            onChange={(event) =>
-                              updateComponent(component.id, {
-                                type: event.target.value as PromptComponentType,
-                              })
-                            }
-                            className="flex-1 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
-                          >
-                            {COMPONENT_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="flex items-center gap-2">
+                <div className="space-y-3 rounded-2xl border border-white/5 bg-slate-950/30 p-2 pr-3">
+                  <div className="max-h-[50vh] space-y-3 pr-2">
+                    {components.map((component, index) => (
+                      <div
+                        key={component.id}
+                        className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
+                      >
+                        <div className="flex flex-col gap-3">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <select
+                              value={component.type}
+                              onChange={(event) =>
+                                updateComponent(component.id, {
+                                  type: event.target.value as PromptComponentType,
+                                })
+                              }
+                              className="flex-1 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                            >
+                              {COMPONENT_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
+                                onClick={() => moveComponent(component.id, -1)}
+                                disabled={index === 0}
+                              >
+                                ↑
+                              </button>
+                              <button
+                                type="button"
+                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
+                                onClick={() => moveComponent(component.id, 1)}
+                                disabled={index === components.length - 1}
+                              >
+                                ↓
+                              </button>
+                            </div>
                             <button
                               type="button"
-                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
-                              onClick={() => moveComponent(component.id, -1)}
-                              disabled={index === 0}
+                              onClick={() => handleRemoveComponent(component.id)}
+                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-rose-300 transition hover:border-rose-400"
                             >
-                              ↑
-                            </button>
-                            <button
-                              type="button"
-                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
-                              onClick={() => moveComponent(component.id, 1)}
-                              disabled={index === components.length - 1}
-                            >
-                              ↓
+                              Remove
                             </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveComponent(component.id)}
-                            className="rounded-md border border-white/10 px-2 py-1 text-xs text-rose-300 transition hover:border-rose-400"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        {(component.type === "emoji" || component.type === "text") && (
-                          <label className="text-sm text-slate-200">
-                            Value
-                            <input
-                              value={component.value ?? ""}
-                              onChange={(event) =>
-                                updateComponent(component.id, {
-                                  value: event.target.value,
-                                })
-                              }
-                              placeholder={
-                                component.type === "emoji"
-                                  ? "e.g. ✨"
-                                  : "Custom text"
-                              }
-                              className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
-                            />
-                          </label>
-                        )}
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          <label className="text-sm text-slate-200">
-                            Prefix
-                            <input
-                              value={component.prefix ?? ""}
-                              onChange={(event) =>
-                                updateComponent(component.id, {
-                                  prefix: event.target.value,
-                                })
-                              }
-                              className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
-                            />
-                          </label>
-                          <label className="text-sm text-slate-200">
-                            Suffix
-                            <input
-                              value={component.suffix ?? ""}
-                              onChange={(event) =>
-                                updateComponent(component.id, {
-                                  suffix: event.target.value,
-                                })
-                              }
-                              className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
-                            />
-                          </label>
-                          <label className="text-sm text-slate-200">
-                            Color
-                            <input
-                              type="color"
-                              value={component.hexColor}
-                              onChange={(event) =>
-                                updateComponent(component.id, {
-                                  hexColor: event.target.value,
-                                })
-                              }
-                              className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
-                            />
-                          </label>
+                          {(component.type === "emoji" ||
+                            component.type === "text") && (
+                            <label className="text-sm text-slate-200">
+                              Value
+                              <input
+                                value={component.value ?? ""}
+                                onChange={(event) =>
+                                  updateComponent(component.id, {
+                                    value: event.target.value,
+                                  })
+                                }
+                                placeholder={
+                                  component.type === "emoji"
+                                    ? "e.g. ✨"
+                                    : "Custom text"
+                                }
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                              />
+                            </label>
+                          )}
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            <label className="text-sm text-slate-200">
+                              Prefix
+                              <input
+                                value={component.prefix ?? ""}
+                                onChange={(event) =>
+                                  updateComponent(component.id, {
+                                    prefix: event.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                              />
+                            </label>
+                            <label className="text-sm text-slate-200">
+                              Suffix
+                              <input
+                                value={component.suffix ?? ""}
+                                onChange={(event) =>
+                                  updateComponent(component.id, {
+                                    suffix: event.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                              />
+                            </label>
+                            <label className="text-sm text-slate-200">
+                              Color
+                              <input
+                                type="color"
+                                value={component.hexColor}
+                                onChange={(event) =>
+                                  updateComponent(component.id, {
+                                    hexColor: event.target.value,
+                                  })
+                                }
+                                className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                              />
+                            </label>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="space-y-4">
@@ -592,22 +591,22 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-3 border-t border-white/5 pt-4 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="rounded-lg border border-accent/60 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/30"
-            >
-              Save theme
-            </button>
-          </div>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-4 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="rounded-lg border border-accent/60 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/30"
+          >
+            Save theme
+          </button>
         </div>
       </div>
     </div>

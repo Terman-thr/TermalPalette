@@ -1,8 +1,8 @@
-# cs465 terminal demo
+# cs465 terminal workspace
 
 A browser-based playground that mimics an oh-my-zsh terminal using Next.js, React, and xterm.js. Everything runs locally in the browser, so you can experiment with colorful prompts, quick commands, and export the palette as a reusable oh-my-zsh theme.
 
-## Run the demo locally
+## Run the workspace locally
 1. Install dependencies and start the dev server:
 
    ```bash
@@ -10,7 +10,7 @@ A browser-based playground that mimics an oh-my-zsh terminal using Next.js, Reac
    npm run dev
    ```
 
-2. Visit `http://localhost:3000` and interact with the terminal window. The UI lists suggested commands (`help`, `clear`, `vim notes.txt`, `theme`) so you can see the prompt styling in action.
+2. Visit `http://localhost:3000` and interact with the terminal window.
 
 ## Exporting a theme to oh-my-zsh
 
@@ -89,7 +89,7 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
    - If git information is missing, double-check that the `git` plugin appears inside the `plugins=(...)` array in `~/.zshrc`.
    - You can restore your old prompt by editing `ZSH_THEME` back to the previous value and sourcing the file again.
 
-Enjoy recreating the terminal experience from this demo inside your real shell!
+Enjoy recreating the terminal experience from this workspace inside your real shell!
 
 ## Design your own prompt
 

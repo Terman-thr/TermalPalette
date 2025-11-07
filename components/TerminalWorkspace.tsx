@@ -28,10 +28,10 @@ class PseudoShell {
   private vimCommandMode = false;
   private vimCommandBuffer = "";
   private readonly promptContext = {
-    user: "demo",
+    user: "builder",
     host: "frontend",
     cwd: "~/playground",
-    fullPath: "/Users/demo/playground",
+    fullPath: "/Users/builder/playground",
     gitBranch: "main",
   };
 
@@ -45,7 +45,7 @@ class PseudoShell {
     this.setTheme(this.themeId, { silent: true });
     this.term.write("\u001b[H\u001b[2J");
     this.term.writeln(
-      "\u001b[38;5;117mWelcome to the browser-based oh-my-zsh demo!\u001b[0m"
+      "\u001b[38;5;117mWelcome to the browser-based oh-my-zsh workspace!\u001b[0m"
     );
     this.term.writeln(
       "Everything runs in React + xterm.js. Type `help` to see what works."
@@ -296,7 +296,7 @@ class PseudoShell {
         this.term.writeln("  clear       Clear the terminal viewport.");
         this.term.writeln("  theme       Cycle through accent themes.");
         this.term.writeln("  vim [file]  Open the simulated vim environment.");
-        this.term.writeln("  about       Learn what powers this demo.");
+        this.term.writeln("  about       Learn what powers this workspace.");
         break;
       case "clear":
         this.term.clear();
@@ -397,11 +397,11 @@ class PseudoShell {
   }
 }
 
-export type TerminalDemoProps = {
+export type TerminalWorkspaceProps = {
   themeId: TerminalThemeId;
 };
 
-const TerminalDemo = ({ themeId }: TerminalDemoProps) => {
+const TerminalWorkspace = ({ themeId }: TerminalWorkspaceProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<PseudoShell | null>(null);
   const [term, setTerm] = useState<Terminal | null>(null);
@@ -545,7 +545,7 @@ const TerminalDemo = ({ themeId }: TerminalDemoProps) => {
           <span className="h-3 w-3 rounded-full bg-[#22d3ee] opacity-80" />
         </div>
         <p className="text-xs font-medium tracking-[0.18em] text-muted">
-          demo@frontend — oh-my-zsh
+          builder@frontend — oh-my-zsh
         </p>
       </div>
       <div ref={containerRef} className="min-h-0 flex-1" />
@@ -553,4 +553,4 @@ const TerminalDemo = ({ themeId }: TerminalDemoProps) => {
   );
 };
 
-export default TerminalDemo;
+export default TerminalWorkspace;

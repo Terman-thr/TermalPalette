@@ -1,13 +1,16 @@
 import dynamic from "next/dynamic";
 
+import HelpBeacon from "../components/HelpBeacon";
+
 const TerminalTabs = dynamic(() => import("../components/TerminalTabs"), {
   ssr: false,
 });
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen w-full">
-      <div className="mx-auto flex h-full w-full flex-1 flex-col gap-10 px-6 py-10 lg:grid lg:grid-cols-[3fr_1fr] lg:gap-12 lg:px-12 xl:max-w-[1400px]">
+    <>
+      <main className="flex min-h-screen w-full">
+        <div className="mx-auto flex h-full w-full flex-1 flex-col gap-10 px-6 py-10 lg:grid lg:grid-cols-[3fr_1fr] lg:gap-12 lg:px-12 xl:max-w-[1400px]">
         <section className="flex min-h-[32rem] flex-col rounded-3xl border border-white/10 bg-panel/95 p-8 shadow-glow backdrop-blur">
           <header className="space-y-3">
             <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
@@ -23,16 +26,16 @@ export default function HomePage() {
             <h2 className="text-xl font-semibold text-slate-100">Try these commands</h2>
             <ul className="grid gap-3 text-sm text-muted">
               <li>
-                <code className="font-mono text-accent">help</code> – list supported demo commands.
+                <code className="font-mono text-accent">help</code>
               </li>
               <li>
-                <code className="font-mono text-accent">clear</code> – wipe the terminal viewport.
+                <code className="font-mono text-accent">clear</code>
               </li>
               <li>
-                <code className="font-mono text-accent">vim notes.txt</code> – open the in-browser vim teaser.
+                <code className="font-mono text-accent">vim notes.txt</code>
               </li>
               <li>
-                <code className="font-mono text-accent">theme</code> – change the prompt accent color.
+                <code className="font-mono text-accent">theme</code>
               </li>
             </ul>
             <a
@@ -49,6 +52,8 @@ export default function HomePage() {
           </div>
         </section>
       </div>
-    </main>
+      </main>
+      <HelpBeacon />
+    </>
   );
 }
