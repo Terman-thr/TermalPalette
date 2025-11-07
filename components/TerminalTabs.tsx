@@ -7,7 +7,10 @@ import type { TerminalDemoProps } from "./TerminalDemo";
 import {
   DEFAULT_THEME_ID,
   TERMINAL_THEMES,
+  getThemeById,
   type TerminalThemeId,
+  type TerminalThemeConfig,
+  type PromptComponentConfig,
 } from "./terminalThemes";
 
 const TerminalPanel = dynamic<TerminalDemoProps>(
@@ -24,6 +27,115 @@ type TerminalTab = {
 };
 
 const buildDefaultName = (index: number) => `Terminal ${index}`;
+
+const promptTokenForType = (type: PromptComponentConfig["type"]): string => {
+  switch (type) {
+    case "time":
+      return "%D{%H:%M}";
+    case "user":
+      return "%n";
+    case "host":
+      return "%m";
+    case "cwd":
+      return "%~";
+    case "fullPath":
+      return "%d";
+    case "git":
+      return "$(git_prompt_info)";
+    default:
+      return "";
+  }
+};
+
+const ANSI_256_COLOR_REGEX = /\[38;5;(\d+)m/g;
+const ANSI_RESET_REGEX = /\[0m/g;
+
+const escapeForSingleQuotes = (value: string) => value.replace(/'/g, "'\"'\"'");
+
+const escapeLiteralSegment = (value: string) =>
+  escapeForSingleQuotes(value).replace(/%/g, "%%");
+
+const extractAnsi256ColorCode = (sequence: string): string | null => {
+  const match = sequence.match(/\[38;5;(\d+)m/);
+  return match?.[1] ?? null;
+};
+
+const buildPromptSuffixSegment = (suffix: string) => {
+  if (!suffix) {
+    return "";
+  }
+
+  const withZshColors = suffix
+    .replace(ANSI_256_COLOR_REGEX, (_match, code: string) => `%F{${code}}`)
+    .replace(ANSI_RESET_REGEX, "%f");
+
+  const withPromptChar = withZshColors.replace(/%(?!F\{|f)/g, "%#");
+
+  return escapeForSingleQuotes(withPromptChar);
+};
+
+const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
+  const segments: string[] = [];
+  let gitPromptPrefix: string | null = null;
+  let gitPromptSuffix: string | null = null;
+
+  theme.promptComponents.forEach((component) => {
+    if (component.type === "git") {
+      const colorCode = extractAnsi256ColorCode(component.color);
+      const colorStart = colorCode ? `%F{${colorCode}}` : "";
+      const colorEnd = colorCode ? "%f" : "";
+      const prefix = escapeLiteralSegment(component.prefix ?? "");
+      const suffix = escapeLiteralSegment(component.suffix ?? "");
+
+      gitPromptPrefix = `${prefix}${colorStart}`;
+      gitPromptSuffix = `${colorEnd}${suffix}`;
+      segments.push(promptTokenForType(component.type));
+      return;
+    }
+
+    const colorCode = extractAnsi256ColorCode(component.color);
+    const colorStart = colorCode ? `%F{${colorCode}}` : "";
+    const colorEnd = colorCode ? "%f" : "";
+    const prefix = escapeLiteralSegment(component.prefix ?? "");
+    const suffix = escapeLiteralSegment(component.suffix ?? "");
+    const token = promptTokenForType(component.type);
+
+    segments.push(`${prefix}${colorStart}${token}${colorEnd}${suffix}`);
+  });
+
+  segments.push(buildPromptSuffixSegment(theme.promptSuffix));
+  const prompt = segments.join("");
+
+  const lines: string[] = [
+    `# oh-my-zsh theme exported from the CS465 terminal demo`,
+    `# Theme: ${theme.label}`,
+    "autoload -U colors && colors",
+    "setopt prompt_subst",
+  ];
+
+  if (gitPromptPrefix !== null && gitPromptSuffix !== null) {
+    lines.push(
+      `ZSH_THEME_GIT_PROMPT_PREFIX='${gitPromptPrefix}'`,
+      `ZSH_THEME_GIT_PROMPT_SUFFIX='${gitPromptSuffix}'`,
+      "ZSH_THEME_GIT_PROMPT_DIRTY='%F{196}✗%f'",
+      "ZSH_THEME_GIT_PROMPT_CLEAN='%F{46}✔%f'"
+    );
+  }
+
+  lines.push(`PROMPT='${prompt}'`, "RPROMPT=''");
+
+  const paletteComment = [
+    "",
+    "# Xterm.js colour palette",
+    `# Background: ${theme.theme.background}`,
+    `# Foreground: ${theme.theme.foreground}`,
+    `# Cursor: ${theme.theme.cursor}`,
+  ];
+
+  lines.push(...paletteComment);
+
+  return `${lines.join("\n")}\n`;
+};
 
 const TerminalTabs = () => {
   const [tabs, setTabs] = useState<TerminalTab[]>([
@@ -149,6 +261,22 @@ const TerminalTabs = () => {
     );
   };
 
+  const handleExportTheme = () => {
+    const theme = getThemeById(activeThemeId);
+    const contents = buildOhMyZshTheme(theme);
+    const blob = new Blob([contents], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${theme.id}.zsh-theme`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center gap-2 border-b border-accent/20 bg-slate-900/80 px-2 py-2">
@@ -268,6 +396,13 @@ const TerminalTabs = () => {
               })
             )}
           </div>
+          <button
+            type="button"
+            onClick={handleExportTheme}
+            className="mt-4 inline-flex items-center justify-center rounded-md border border-accent/40 bg-slate-900/70 px-3 py-2 text-sm font-medium text-accent transition hover:bg-accent/20 hover:text-slate-50"
+          >
+            Export theme for oh-my-zsh
+          </button>
         </aside>
         <div className="relative flex flex-1 overflow-hidden">
           {tabs.map((tab) => (
