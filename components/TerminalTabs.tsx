@@ -4,10 +4,12 @@ import dynamic from "next/dynamic";
 import { useMemo, useRef, useState } from "react";
 
 import type { TerminalDemoProps } from "./TerminalDemo";
+import ThemeEditor from "./ThemeEditor";
 import {
   DEFAULT_THEME_ID,
   TERMINAL_THEMES,
   getThemeById,
+  setCustomThemes as registerCustomThemes,
   type TerminalThemeId,
   type TerminalThemeConfig,
   type PromptComponentConfig,
@@ -28,8 +30,10 @@ type TerminalTab = {
 
 const buildDefaultName = (index: number) => `Terminal ${index}`;
 
-const promptTokenForType = (type: PromptComponentConfig["type"]): string => {
-  switch (type) {
+const promptTokenForComponent = (
+  component: PromptComponentConfig
+): string => {
+  switch (component.type) {
     case "time":
       return "%D{%H:%M}";
     case "user":
@@ -42,6 +46,9 @@ const promptTokenForType = (type: PromptComponentConfig["type"]): string => {
       return "%d";
     case "git":
       return "$(git_prompt_info)";
+    case "emoji":
+    case "text":
+      return escapeLiteralSegment(component.value ?? "");
     default:
       return "";
   }
@@ -89,7 +96,7 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
 
       gitPromptPrefix = `${prefix}${colorStart}`;
       gitPromptSuffix = `${colorEnd}${suffix}`;
-      segments.push(promptTokenForType(component.type));
+      segments.push(promptTokenForComponent(component));
       return;
     }
 
@@ -98,7 +105,7 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
     const colorEnd = colorCode ? "%f" : "";
     const prefix = escapeLiteralSegment(component.prefix ?? "");
     const suffix = escapeLiteralSegment(component.suffix ?? "");
-    const token = promptTokenForType(component.type);
+    const token = promptTokenForComponent(component);
 
     segments.push(`${prefix}${colorStart}${token}${colorEnd}${suffix}`);
   });
@@ -126,7 +133,7 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
 
   const paletteComment = [
     "",
-    "# Xterm.js colour palette",
+    "# Xterm.js color palette",
     `# Background: ${theme.theme.background}`,
     `# Foreground: ${theme.theme.foreground}`,
     `# Cursor: ${theme.theme.cursor}`,
@@ -149,6 +156,11 @@ const TerminalTabs = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draftName, setDraftName] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [customThemes, setCustomThemes] = useState<TerminalThemeConfig[]>([]);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editorSeed, setEditorSeed] = useState<TerminalThemeConfig | null>(
+    null
+  );
   const idCounter = useRef(2);
 
   const handleAddTab = () => {
@@ -234,16 +246,20 @@ const TerminalTabs = () => {
 
   const activeTab = tabs.find((tab) => tab.id === activeId);
   const activeThemeId = activeTab?.themeId ?? DEFAULT_THEME_ID;
+  const availableThemes = useMemo(
+    () => [...TERMINAL_THEMES, ...customThemes],
+    [customThemes]
+  );
 
   const filteredThemes = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     if (!query) {
-      return TERMINAL_THEMES;
+      return availableThemes;
     }
-    return TERMINAL_THEMES.filter((theme) =>
+    return availableThemes.filter((theme) =>
       theme.label.toLowerCase().includes(query)
     );
-  }, [searchTerm]);
+  }, [searchTerm, availableThemes]);
 
   const handleThemeSelect = (themeId: TerminalThemeId) => {
     if (!activeTab) {
@@ -275,6 +291,43 @@ const TerminalTabs = () => {
     anchor.click();
     document.body.removeChild(anchor);
     window.URL.revokeObjectURL(url);
+  };
+
+  const openEditor = () => {
+    const theme = getThemeById(activeThemeId);
+    setEditorSeed(theme);
+    setIsEditorOpen(true);
+  };
+
+  const handleEditorCancel = () => {
+    setIsEditorOpen(false);
+    setEditorSeed(null);
+  };
+
+  const handleEditorSave = (theme: TerminalThemeConfig) => {
+    setCustomThemes((prev) => {
+      const index = prev.findIndex((item) => item.id === theme.id);
+      const next = [...prev];
+      if (index === -1) {
+        next.push(theme);
+      } else {
+        next[index] = theme;
+      }
+      registerCustomThemes(next);
+      return next;
+    });
+    setTabs((prev) =>
+      prev.map((tab) =>
+        tab.id === activeId
+          ? {
+              ...tab,
+              themeId: theme.id,
+            }
+          : tab
+      )
+    );
+    setIsEditorOpen(false);
+    setEditorSeed(null);
   };
 
   return (
@@ -403,6 +456,13 @@ const TerminalTabs = () => {
           >
             Export theme for oh-my-zsh
           </button>
+          <button
+            type="button"
+            onClick={openEditor}
+            className="mt-2 inline-flex items-center justify-center rounded-md border border-white/20 bg-slate-900/50 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-accent/60 hover:text-accent"
+          >
+            Customize theme
+          </button>
         </aside>
         <div className="relative flex flex-1 overflow-hidden">
           {tabs.map((tab) => (
@@ -419,6 +479,13 @@ const TerminalTabs = () => {
           ))}
         </div>
       </div>
+      {isEditorOpen && editorSeed ? (
+        <ThemeEditor
+          initialTheme={editorSeed}
+          onCancel={handleEditorCancel}
+          onSave={handleEditorSave}
+        />
+      ) : null}
     </div>
   );
 };

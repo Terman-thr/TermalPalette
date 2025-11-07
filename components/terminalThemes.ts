@@ -1,11 +1,15 @@
 import type { ITheme } from "xterm";
 
-export type TerminalThemeId =
+export type BuiltInThemeId =
   | "robbyrussell"
   | "agnoster"
   | "ys"
   | "bureau"
   | "avit";
+
+export type CustomThemeId = `custom-${string}`;
+
+export type TerminalThemeId = BuiltInThemeId | CustomThemeId;
 
 export type PromptComponentType =
   | "time"
@@ -13,13 +17,16 @@ export type PromptComponentType =
   | "host"
   | "cwd"
   | "fullPath"
-  | "git";
+  | "git"
+  | "emoji"
+  | "text";
 
 export type PromptComponentConfig = {
   type: PromptComponentType;
   color: string;
   prefix?: string;
   suffix?: string;
+  value?: string;
 };
 
 export type TerminalThemeConfig = {
@@ -308,9 +315,26 @@ export const TERMINAL_THEMES: TerminalThemeConfig[] = [
 
 export const DEFAULT_THEME_ID: TerminalThemeId = TERMINAL_THEMES[0].id;
 
-const themeMap = new Map<TerminalThemeId, TerminalThemeConfig>(
-  TERMINAL_THEMES.map((theme) => [theme.id, theme])
-);
+let customThemes: TerminalThemeConfig[] = [];
+let themeMap = new Map<TerminalThemeId, TerminalThemeConfig>();
+
+const buildThemeMap = () => {
+  themeMap = new Map(
+    [...TERMINAL_THEMES, ...customThemes].map((theme) => [theme.id, theme])
+  );
+};
+
+buildThemeMap();
+
+export const setCustomThemes = (themes: TerminalThemeConfig[]) => {
+  customThemes = themes;
+  buildThemeMap();
+};
+
+export const getAllThemes = (): TerminalThemeConfig[] => [
+  ...TERMINAL_THEMES,
+  ...customThemes,
+];
 
 export const getThemeById = (
   id: TerminalThemeId | undefined
@@ -325,7 +349,8 @@ export const getThemeIndex = (id: TerminalThemeId | undefined): number => {
   if (!id) {
     return 0;
   }
-  const index = TERMINAL_THEMES.findIndex((theme) => theme.id === id);
+  const themes = getAllThemes();
+  const index = themes.findIndex((theme) => theme.id === id);
   return index === -1 ? 0 : index;
 };
 

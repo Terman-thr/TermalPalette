@@ -1,6 +1,6 @@
 # cs465 terminal demo
 
-A browser-based playground that mimics an oh-my-zsh terminal using Next.js, React, and xterm.js. Everything runs locally in the browser, so you can experiment with colourful prompts, quick commands, and export the palette as a reusable oh-my-zsh theme.
+A browser-based playground that mimics an oh-my-zsh terminal using Next.js, React, and xterm.js. Everything runs locally in the browser, so you can experiment with colorful prompts, quick commands, and export the palette as a reusable oh-my-zsh theme.
 
 ## Run the demo locally
 1. Install dependencies and start the dev server:
@@ -34,7 +34,7 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
 
 ### 2. Locate the exported file
 1. Export a theme from the browser UI (e.g. `robbyrussell.zsh-theme`). Your browser saves it in the default downloads folder.
-2. (Optional) Inspect the file to see the generated prompt and colour palette:
+2. (Optional) Inspect the file to see the generated prompt and color palette:
 
    ```bash
    head ~/Downloads/robbyrussell.zsh-theme
@@ -83,10 +83,20 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
    source ~/.zshrc
    ```
 
-2. Run a few commands (`ls`, `git status`, etc.) to confirm the colours, git badge, and prompt symbols match what you exported. The generated file already enables `prompt_subst` and adds git prompt decorations, so no extra plugins are required beyond oh-my-zsh's default `git` plugin.
+2. Run a few commands (`ls`, `git status`, etc.) to confirm the colors, git badge, and prompt symbols match what you exported. The generated file already enables `prompt_subst` and adds git prompt decorations, so no extra plugins are required beyond oh-my-zsh's default `git` plugin.
 3. Troubleshooting:
    - If the prompt reverts to the default, ensure the filename in `~/.zshrc` exactly matches the file you copied into `custom/themes`.
    - If git information is missing, double-check that the `git` plugin appears inside the `plugins=(...)` array in `~/.zshrc`.
    - You can restore your old prompt by editing `ZSH_THEME` back to the previous value and sourcing the file again.
 
 Enjoy recreating the terminal experience from this demo inside your real shell!
+
+## Design your own prompt
+
+Select any terminal tab and click **Customize theme** to open the editor overlay. It starts with the currently active theme and lets you:
+
+1. Add, remove, or reorder prompt components (user, host, current directory, full path, git branch, time, freeform text, or emoji).
+2. Set individual prefixes/suffixes and pick colors for every component using the built-in palette picker.
+3. Choose a prompt-ending symbol (including emoji) and tweak the terminal background/foreground/cursor colors used in the preview.
+
+Save your edits to add the new theme to the selection list instantly. The terminal switches to it right away, and you can export it as an oh-my-zsh theme just like the built-in presets.

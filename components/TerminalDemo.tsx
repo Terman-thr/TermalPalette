@@ -7,7 +7,7 @@ import "xterm/css/xterm.css";
 
 import {
   DEFAULT_THEME_ID,
-  TERMINAL_THEMES,
+  getAllThemes,
   getThemeById,
   getThemeIndex,
   type PromptComponentConfig,
@@ -114,7 +114,7 @@ class PseudoShell {
   }
 
   private renderComponent(component: PromptComponentConfig): string {
-    const value = this.getComponentValue(component.type);
+    const value = this.getComponentValue(component);
     if (!value) {
       return "";
     }
@@ -123,8 +123,8 @@ class PseudoShell {
     return `${prefix}${component.color}${value}\u001b[0m${suffix}`;
   }
 
-  private getComponentValue(type: PromptComponentConfig["type"]): string {
-    switch (type) {
+  private getComponentValue(component: PromptComponentConfig): string {
+    switch (component.type) {
       case "user":
         return this.promptContext.user;
       case "host":
@@ -143,6 +143,9 @@ class PseudoShell {
           hour12: false,
         });
       }
+      case "emoji":
+      case "text":
+        return component.value ?? "";
       default:
         return "";
     }
@@ -266,8 +269,9 @@ class PseudoShell {
   }
 
   private cycleTheme() {
-    this.themeIndex = (this.themeIndex + 1) % TERMINAL_THEMES.length;
-    const nextTheme = TERMINAL_THEMES[this.themeIndex];
+    const themes = getAllThemes();
+    this.themeIndex = (this.themeIndex + 1) % themes.length;
+    const nextTheme = themes[this.themeIndex];
     this.setTheme(nextTheme.id, { silent: true, clear: true });
     this.term.writeln(
       `Switched to \u001b[38;5;81m${nextTheme.label}\u001b[0m theme.`

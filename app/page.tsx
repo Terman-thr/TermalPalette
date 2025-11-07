@@ -32,7 +32,7 @@ export default function HomePage() {
                 <code className="font-mono text-accent">vim notes.txt</code> – open the in-browser vim teaser.
               </li>
               <li>
-                <code className="font-mono text-accent">theme</code> – change the prompt accent colour.
+                <code className="font-mono text-accent">theme</code> – change the prompt accent color.
               </li>
             </ul>
             <a
