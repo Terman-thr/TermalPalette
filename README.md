@@ -1,36 +1,92 @@
 # cs465 terminal demo
 
-Pure frontend Next.js playground that renders an xterm.js instance styled to mimic an oh-my-zsh terminal. A lightweight TypeScript shell stub handles a handful of commands, including a simulated `vim` experience, without relying on any backend or container runtime.
+A browser-based playground that mimics an oh-my-zsh terminal using Next.js, React, and xterm.js. Everything runs locally in the browser, so you can experiment with colourful prompts, quick commands, and export the palette as a reusable oh-my-zsh theme.
 
-## Features
-- **Next.js + React** app router setup with first-class TypeScript support.
-- **xterm.js integration** with responsive fit addon and a macOS-style window chrome.
-- **oh-my-zsh inspired prompt** including colourful user/host/path segments and a fake git status.
-- **Command handlers** for `help`, `clear`, `theme`, `about`, and a `vim [file]` teaser that demonstrates modal interaction purely in the browser.
+## Run the demo locally
+1. Install dependencies and start the dev server:
 
-> 🚧 This is a demo-only environment: commands are interpreted by JavaScript. There is no real zsh runtime, plugin system, or vim binary bundled.
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-## Getting started
+2. Visit `http://localhost:3000` and interact with the terminal window. The UI lists suggested commands (`help`, `clear`, `vim notes.txt`, `theme`) so you can see the prompt styling in action.
 
-```bash
-npm install
-npm run dev
-```
+## Exporting a theme to oh-my-zsh
 
-Then open `http://localhost:3000` to try the terminal. Use `help` inside the terminal to see the available commands and hints.
+Use the "Export theme for oh-my-zsh" button in the sidebar to download the currently selected theme as a `.zsh-theme` file. Then follow the steps below to apply it to your real shell. The process is shared by macOS and most Linux distributions; whenever there is a small difference you'll see it noted explicitly.
 
-## Deploy to GitHub Pages
-1. Export the site: `npm run export`. This writes a static build to `out/`.
-2. When deploying to `username.github.io/reponame`, build with `NEXT_PUBLIC_GITHUB_PAGES_PATH=reponame npm run export` so the exported assets are prefixed correctly. For a custom domain (e.g. `haorantang.dev`), omit the variable so the app exports to the root.
-3. Publish the contents of `out/` to your GitHub Pages branch (e.g. `gh-pages`) and enable Pages in your repository settings. The build now includes `CNAME` and `.nojekyll`; keep both files in the branch so GitHub serves the `_next/` assets and honours the custom domain.
-4. For automation, configure a GitHub Action that sets `NEXT_PUBLIC_GITHUB_PAGES_PATH` only for path-based deployments, runs `npm ci && npm run export`, and pushes the `out/` folder (including `CNAME` and `.nojekyll`) to the Pages branch.
+### 1. Verify that oh-my-zsh is installed
+1. Confirm `zsh` is available:
 
-## Project layout
-- `app/` – Next.js app router pages and global styles.
-- `components/TerminalDemo.tsx` – xterm.js setup and the pseudo shell implementation.
-- `package.json` – scripts and dependencies for the demo.
+   ```bash
+   zsh --version
+   ```
 
-## Next steps
-- Swap in a real WASM shell (e.g. `wasm/zig` or `webcontainer`) if you need genuine command execution.
-- Extend the pseudo shell command table or integrate with a backend for bespoke workflows.
-- Enhance the `vim` mock with richer key handling or integrate a web-based editor component.
+2. Check that oh-my-zsh owns your shell:
+
+   ```bash
+   echo $ZSH
+   omz --version
+   ```
+
+   If either command reports the oh-my-zsh directory (typically `~/.oh-my-zsh`) or prints a version, you are good to go. Otherwise install oh-my-zsh via the instructions at [ohmyz.sh](https://ohmyz.sh/#install) before continuing.
+
+### 2. Locate the exported file
+1. Export a theme from the browser UI (e.g. `robbyrussell.zsh-theme`). Your browser saves it in the default downloads folder.
+2. (Optional) Inspect the file to see the generated prompt and colour palette:
+
+   ```bash
+   head ~/Downloads/robbyrussell.zsh-theme
+   ```
+
+### 3. Move the theme into oh-my-zsh's custom directory
+1. Make sure the directory exists:
+
+   ```bash
+   mkdir -p ~/.oh-my-zsh/custom/themes
+   ```
+
+2. Move or copy the downloaded file:
+
+   ```bash
+   mv ~/Downloads/robbyrussell.zsh-theme ~/.oh-my-zsh/custom/themes/
+   ```
+
+3. Finder vs Nautilus: on macOS you can run `open ~/.oh-my-zsh`, while on Linux you can run `xdg-open ~/.oh-my-zsh` to open the folder graphically. The remaining steps are identical afterward.
+4. Confirm the theme is present:
+
+   ```bash
+   ls ~/.oh-my-zsh/custom/themes | grep robbyrussell
+   ```
+
+### 4. Activate the theme via `~/.zshrc`
+1. Open `~/.zshrc` in your editor of choice:
+
+   ```bash
+   nano ~/.zshrc
+   # or: code ~/.zshrc, vim ~/.zshrc, etc.
+   ```
+
+2. Update the `ZSH_THEME` line with the filename **without** the `.zsh-theme` extension:
+
+   ```bash
+   ZSH_THEME="robbyrussell"
+   ```
+
+   If you keep custom files outside `~/.oh-my-zsh/custom`, set `ZSH_CUSTOM` earlier in the file so oh-my-zsh knows where to search.
+
+### 5. Apply and test the prompt
+1. Reload your shell configuration or open a new terminal window:
+
+   ```bash
+   source ~/.zshrc
+   ```
+
+2. Run a few commands (`ls`, `git status`, etc.) to confirm the colours, git badge, and prompt symbols match what you exported. The generated file already enables `prompt_subst` and adds git prompt decorations, so no extra plugins are required beyond oh-my-zsh's default `git` plugin.
+3. Troubleshooting:
+   - If the prompt reverts to the default, ensure the filename in `~/.zshrc` exactly matches the file you copied into `custom/themes`.
+   - If git information is missing, double-check that the `git` plugin appears inside the `plugins=(...)` array in `~/.zshrc`.
+   - You can restore your old prompt by editing `ZSH_THEME` back to the previous value and sourcing the file again.
+
+Enjoy recreating the terminal experience from this demo inside your real shell!

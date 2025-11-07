@@ -35,6 +35,14 @@ export default function HomePage() {
                 <code className="font-mono text-accent">theme</code> – change the prompt accent colour.
               </li>
             </ul>
+            <a
+              href="https://github.com/Terman-thr/TermalPalette#readme"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md border border-accent/40 bg-slate-900/60 px-3 py-2 text-sm font-medium text-accent transition hover:bg-accent/20 hover:text-slate-50"
+            >
+              View GitHub README
+            </a>
           </div>
           <div className="mt-auto pt-6 text-xs text-muted/70">
             Best experienced on desktop-sized viewports.
