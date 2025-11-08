@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+
+import type { InstructionSection } from "./helpTypes";
 
 const tutorialSteps = [
   "Open a terminal tab and explore the builtin commands.",
@@ -23,10 +25,34 @@ const faqs = [
   },
 ];
 
-const HelpBeacon = () => {
+type HelpBeaconProps = {
+  instructionSections?: InstructionSection[];
+};
+
+const HelpBeacon = ({ instructionSections }: HelpBeaconProps) => {
   const [open, setOpen] = useState(false);
   const toggle = () => setOpen((prev) => !prev);
   const panelId = useMemo(() => `help-panel-${Math.random().toString(36).slice(2)}`, []);
+  const [copied, setCopied] = useState<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+
+  const handleCopy = (command: string) => {
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
+    navigator.clipboard
+      .writeText(command)
+      .then(() => {
+        setCopied(command);
+        timeoutRef.current = window.setTimeout(() => {
+          setCopied(null);
+          timeoutRef.current = null;
+        }, 2000);
+      })
+      .catch(() => {
+        setCopied(null);
+      });
+  };
 
   return (
     <>
@@ -43,7 +69,7 @@ const HelpBeacon = () => {
       {open ? (
         <section
           id={panelId}
-          className="fixed bottom-20 right-4 z-40 w-80 rounded-2xl border border-accent/40 bg-slate-950/95 p-4 text-sm text-slate-100 shadow-2xl"
+          className="fixed bottom-20 right-4 z-40 max-h-[80vh] w-80 overflow-y-auto rounded-2xl border border-accent/40 bg-slate-950/95 p-4 text-sm text-slate-100 shadow-2xl"
         >
           <header className="flex items-center justify-between">
             <p className="text-base font-semibold">Quick guide</p>
@@ -77,6 +103,52 @@ const HelpBeacon = () => {
               ))}
             </dl>
           </div>
+          {instructionSections?.length ? (
+            <details className="mt-4 rounded-2xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-slate-200">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                Custom theme instructions
+              </summary>
+              <div className="mt-3 space-y-3 text-left">
+                {instructionSections.map((section) => (
+                  <div key={section.title} className="rounded-xl border border-white/5 bg-black/30 p-2">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-muted">
+                      {section.title}
+                    </p>
+                    {section.description ? (
+                      <p className="mt-1 text-[0.7rem] text-slate-200">
+                        {section.description}
+                      </p>
+                    ) : null}
+                    <ul className="mt-2 space-y-2">
+                      {section.items.map((item, index) =>
+                        item.kind === "text" ? (
+                          <li key={`${section.title}-text-${index}`} className="text-[0.7rem] text-slate-300">
+                            {item.content}
+                          </li>
+                        ) : (
+                          <li
+                            key={`${section.title}-cmd-${index}`}
+                            className="flex items-center gap-2 rounded-lg bg-slate-950/70 px-2 py-1"
+                          >
+                            <code className="flex-1 truncate text-[0.65rem] text-slate-100">
+                              {item.content}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(item.content)}
+                              className="rounded-md border border-white/20 px-2 py-1 text-[0.6rem] font-semibold text-slate-100 transition hover:border-accent"
+                            >
+                              {copied === item.content ? "Copied!" : "Copy"}
+                            </button>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ) : null}
         </section>
       ) : null}
     </>

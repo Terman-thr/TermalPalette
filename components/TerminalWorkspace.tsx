@@ -28,10 +28,10 @@ class PseudoShell {
   private vimCommandMode = false;
   private vimCommandBuffer = "";
   private readonly promptContext = {
-    user: "builder",
+    user: "<your-name>",
     host: "frontend",
     cwd: "~/playground",
-    fullPath: "/Users/builder/playground",
+    fullPath: "/Users/<your-name>/playground",
     gitBranch: "main",
   };
 
@@ -545,7 +545,7 @@ const TerminalWorkspace = ({ themeId }: TerminalWorkspaceProps) => {
           <span className="h-3 w-3 rounded-full bg-[#22d3ee] opacity-80" />
         </div>
         <p className="text-xs font-medium tracking-[0.18em] text-muted">
-          builder@frontend — oh-my-zsh
+          {"<your-name>"}@frontend — oh-my-zsh
         </p>
       </div>
       <div ref={containerRef} className="min-h-0 flex-1" />

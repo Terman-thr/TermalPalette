@@ -172,10 +172,10 @@ const slugify = (value: string) =>
     .replace(/^-+|-+$/g, "");
 
 const PREVIEW_CONTEXT = {
-  user: "builder",
+  user: "<your-name>",
   host: "frontend",
   cwd: "~/playground",
-  fullPath: "/Users/builder/playground",
+  fullPath: "/Users/<your-name>/playground",
   git: "main",
   time: "14:32",
 };

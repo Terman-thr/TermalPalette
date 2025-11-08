@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { TerminalWorkspaceProps } from "./TerminalWorkspace";
 import ThemeEditor from "./ThemeEditor";
@@ -14,6 +14,8 @@ import {
   type TerminalThemeConfig,
   type PromptComponentConfig,
 } from "./terminalThemes";
+import type { InstructionSection } from "./helpTypes";
+import { useThemeStore } from "./ThemeContext";
 
 const TerminalPanel = dynamic<TerminalWorkspaceProps>(
   () => import("./TerminalWorkspace"),
@@ -113,9 +115,31 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
   segments.push(buildPromptSuffixSegment(theme.promptSuffix));
   const prompt = segments.join("");
 
+  const themeFileName = `${theme.id}.zsh-theme`;
+
   const lines: string[] = [
     `# oh-my-zsh theme exported from the CS465 terminal workspace`,
     `# Theme: ${theme.label}`,
+    "#",
+    "# Quick checklist (copy the commands you need):",
+    "#   zsh --version",
+    "#   echo $ZSH",
+    "#   omz --version",
+    "#",
+    "# Install & activate:",
+    "#   mkdir -p ~/.oh-my-zsh/custom/themes",
+    `#   mv ~/Downloads/${themeFileName} ~/.oh-my-zsh/custom/themes/`,
+    "#   nano ~/.zshrc    # set ZSH_THEME=\"${theme.id}\" and save",
+    "#   source ~/.zshrc",
+    "#",
+    "# Alternate switcher (if you have multiple custom themes):",
+    `#   omz theme set \"${theme.id}\" --skip-clone`,
+    "#",
+    "# Troubleshooting:",
+    `#   ls ~/.oh-my-zsh/custom/themes | grep ${theme.id}`,
+    "#   ensure the git plugin stays in plugins=(git ...)",
+    "#   rerun source ~/.zshrc after edits",
+    "#",
     "autoload -U colors && colors",
     "setopt prompt_subst",
   ];
@@ -144,6 +168,77 @@ const buildOhMyZshTheme = (theme: TerminalThemeConfig) => {
   return `${lines.join("\n")}\n`;
 };
 
+const buildInstructionSections = (
+  theme: TerminalThemeConfig
+): InstructionSection[] => {
+  const fileName = `${theme.id}.zsh-theme`;
+  return [
+    {
+      title: "Verify installation",
+      description:
+        "Confirm zsh and oh-my-zsh are ready before applying the exported theme.",
+      items: [
+        { kind: "command", content: "zsh --version" },
+        { kind: "command", content: "echo $USER" },
+        { kind: "command", content: "echo $ZSH" },
+        { kind: "command", content: "omz --version" },
+      ],
+    },
+    {
+      title: "Inspect download (optional)",
+      description: "Peek at the generated file if you want to double-check it.",
+      items: [{ kind: "command", content: `head ~/Downloads/${fileName}` }],
+    },
+    {
+      title: "Move the theme file",
+      description:
+        "Place the downloaded file in oh-my-zsh's custom themes directory.",
+      items: [
+        { kind: "command", content: "mkdir -p ~/.oh-my-zsh/custom/themes" },
+        {
+          kind: "command",
+          content: `mv ~/Downloads/${fileName} ~/.oh-my-zsh/custom/themes/`,
+        },
+      ],
+    },
+    {
+      title: "Activate via ~/.zshrc",
+      description: `Set ZSH_THEME=\"${theme.id}\" and reload your shell.`,
+      items: [
+        { kind: "command", content: "nano ~/.zshrc" },
+        {
+          kind: "text",
+          content: `Inside the file ensure: ZSH_THEME=\"${theme.id}\"`,
+        },
+        { kind: "command", content: "source ~/.zshrc" },
+      ],
+    },
+    {
+      title: "Alternate omz switcher",
+      description:
+        "Use the omz helper when you juggle multiple custom themes.",
+      items: [
+        {
+          kind: "command",
+          content: `omz theme set "${theme.id}" --skip-clone`,
+        },
+      ],
+    },
+    {
+      title: "Troubleshooting",
+      description: "Quick checks if the prompt does not load as expected.",
+      items: [
+        {
+          kind: "command",
+          content: `ls ~/.oh-my-zsh/custom/themes | grep ${theme.id}`,
+        },
+        { kind: "command", content: "plugins=(git ...)" },
+        { kind: "command", content: "source ~/.zshrc" },
+      ],
+    },
+  ];
+};
+
 const TerminalTabs = () => {
   const [tabs, setTabs] = useState<TerminalTab[]>([
     {
@@ -156,12 +251,20 @@ const TerminalTabs = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draftName, setDraftName] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [customThemes, setCustomThemes] = useState<TerminalThemeConfig[]>([]);
+  const { customThemes, setCustomThemes, setInstructionSections } =
+    useThemeStore();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorSeed, setEditorSeed] = useState<TerminalThemeConfig | null>(
     null
   );
+  const [showExportGuide, setShowExportGuide] = useState(false);
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+  const commandCopyTimeoutRef = useRef<number | null>(null);
   const idCounter = useRef(2);
+
+  useEffect(() => {
+    registerCustomThemes(customThemes);
+  }, [customThemes]);
 
   const handleAddTab = () => {
     setTabs((prev) => {
@@ -246,6 +349,18 @@ const TerminalTabs = () => {
 
   const activeTab = tabs.find((tab) => tab.id === activeId);
   const activeThemeId = activeTab?.themeId ?? DEFAULT_THEME_ID;
+  const activeTheme = useMemo(
+    () => getThemeById(activeThemeId),
+    [activeThemeId]
+  );
+  const instructionSections = useMemo(
+    () => buildInstructionSections(activeTheme),
+    [activeTheme]
+  );
+
+  useEffect(() => {
+    setInstructionSections(instructionSections);
+  }, [instructionSections, setInstructionSections]);
   const availableThemes = useMemo(
     () => [...TERMINAL_THEMES, ...customThemes],
     [customThemes]
@@ -278,24 +393,23 @@ const TerminalTabs = () => {
   };
 
   const handleExportTheme = () => {
-    const theme = getThemeById(activeThemeId);
-    const contents = buildOhMyZshTheme(theme);
+    const contents = buildOhMyZshTheme(activeTheme);
     const blob = new Blob([contents], {
       type: "text/plain;charset=utf-8",
     });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `${theme.id}.zsh-theme`;
+    anchor.download = `${activeTheme.id}.zsh-theme`;
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
     window.URL.revokeObjectURL(url);
+    setShowExportGuide(true);
   };
 
   const openEditor = () => {
-    const theme = getThemeById(activeThemeId);
-    setEditorSeed(theme);
+    setEditorSeed(activeTheme);
     setIsEditorOpen(true);
   };
 
@@ -330,155 +444,184 @@ const TerminalTabs = () => {
     setEditorSeed(null);
   };
 
-  return (
-    <div className="flex h-full w-full flex-col">
-      <div className="flex items-center gap-2 border-b border-accent/20 bg-slate-900/80 px-2 py-2">
-        <div className="flex min-w-0 flex-1 gap-2">
-          {tabs.map((tab) => {
-            const isActive = tab.id === activeId;
-            const isEditing = tab.id === editingId;
+  const handleCopyCommand = (command: string) => {
+    if (commandCopyTimeoutRef.current !== null) {
+      window.clearTimeout(commandCopyTimeoutRef.current);
+    }
+    navigator.clipboard
+      .writeText(command)
+      .then(() => {
+        setCopiedCommand(command);
+        commandCopyTimeoutRef.current = window.setTimeout(() => {
+          setCopiedCommand(null);
+          commandCopyTimeoutRef.current = null;
+        }, 2000);
+      })
+      .catch(() => {
+        setCopiedCommand(null);
+      });
+  };
 
-            return (
-              <div
-                key={tab.id}
-                className="flex flex-1 min-w-0"
-              >
-                <button
-                  type="button"
-                  onClick={() => handleTabClick(tab.id)}
-                  onDoubleClick={() => beginRename(tab.id)}
-                  className={`${
-                    isActive
-                      ? "border-accent/90 bg-slate-800/80 text-slate-50"
-                      : "border-transparent text-muted hover:bg-slate-800/60 hover:text-slate-200"
-                  } flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors`}
+  useEffect(() => {
+    return () => {
+      if (commandCopyTimeoutRef.current !== null) {
+        window.clearTimeout(commandCopyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      <div className="flex h-full w-full flex-col">
+        <div className="flex items-center gap-2 border-b border-accent/20 bg-slate-900/80 px-2 py-2">
+          <div className="flex min-w-0 flex-1 gap-2">
+            {tabs.map((tab) => {
+              const isActive = tab.id === activeId;
+              const isEditing = tab.id === editingId;
+
+              return (
+                <div
+                  key={tab.id}
+                  className="flex flex-1 min-w-0"
                 >
-                  {isEditing ? (
-                    <input
-                      autoFocus
-                      value={draftName}
-                      onChange={(event) => setDraftName(event.target.value)}
-                      onBlur={(event) =>
-                        commitRename(tab.id, event.target.value)
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          commitRename(tab.id, draftName);
-                        }
-                        if (event.key === "Escape") {
-                          event.preventDefault();
-                          cancelRename();
-                        }
-                      }}
-                      className="w-full min-w-0 border-none bg-transparent text-left text-sm font-medium text-slate-50 outline-none"
-                    />
-                  ) : (
-                    <span className="min-w-0 flex-1 truncate text-left">
-                      {tab.name}
-                    </span>
-                  )}
                   <button
                     type="button"
-                    className={`rounded-sm px-1 text-xs font-semibold transition ${
-                      tabs.length === 1
-                        ? "cursor-not-allowed text-muted/60"
-                        : isActive
-                        ? "text-accent/90 hover:text-accent"
-                        : "text-muted hover:text-slate-200"
-                    }`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleCloseTab(tab.id);
-                    }}
-                    disabled={tabs.length === 1}
-                    aria-label={`Close ${tab.name}`}
+                    onClick={() => handleTabClick(tab.id)}
+                    onDoubleClick={() => beginRename(tab.id)}
+                    className={`${
+                      isActive
+                        ? "border-accent/90 bg-slate-800/80 text-slate-50"
+                        : "border-transparent text-muted hover:bg-slate-800/60 hover:text-slate-200"
+                    } flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors`}
                   >
-                    ×
-                  </button>
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        <button
-          type="button"
-          onClick={handleAddTab}
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-accent/40 text-lg font-semibold text-accent transition hover:bg-accent/10"
-          aria-label="Add terminal tab"
-        >
-          +
-        </button>
-      </div>
-      <div className="flex min-h-0 flex-1 bg-[#0b1220]">
-        <aside className="flex w-64 min-w-[16rem] flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
-          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-            Theme
-          </label>
-          <input
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search themes"
-            className="mt-2 w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
-          />
-          <div className="mt-3 flex-1 overflow-y-auto pr-1">
-            {filteredThemes.length === 0 ? (
-              <p className="px-1 text-xs text-muted">No themes found</p>
-            ) : (
-              filteredThemes.map((theme) => {
-                const isSelected = theme.id === activeThemeId;
-                return (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    onClick={() => handleThemeSelect(theme.id)}
-                    className={`mt-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition ${
-                      isSelected
-                        ? "bg-accent/20 text-slate-50"
-                        : "text-muted hover:bg-slate-800/70 hover:text-slate-100"
-                    }`}
-                  >
-                    <span className="truncate">{theme.label}</span>
-                    {isSelected ? (
-                      <span className="text-xs font-semibold text-accent">
-                        Active
+                    {isEditing ? (
+                      <input
+                        autoFocus
+                        value={draftName}
+                        onChange={(event) => setDraftName(event.target.value)}
+                        onBlur={(event) =>
+                          commitRename(tab.id, event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            commitRename(tab.id, draftName);
+                          }
+                          if (event.key === "Escape") {
+                            event.preventDefault();
+                            cancelRename();
+                          }
+                        }}
+                        className="w-full min-w-0 border-none bg-transparent text-left text-sm font-medium text-slate-50 outline-none"
+                      />
+                    ) : (
+                      <span className="min-w-0 flex-1 truncate text-left">
+                        {tab.name}
                       </span>
-                    ) : null}
+                    )}
+                    <button
+                      type="button"
+                      className={`rounded-sm px-1 text-xs font-semibold transition ${
+                        tabs.length === 1
+                          ? "cursor-not-allowed text-muted/60"
+                          : isActive
+                          ? "text-accent/90 hover:text-accent"
+                          : "text-muted hover:text-slate-200"
+                      }`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleCloseTab(tab.id);
+                      }}
+                      disabled={tabs.length === 1}
+                      aria-label={`Close ${tab.name}`}
+                    >
+                      ×
+                    </button>
                   </button>
-                );
-              })
-            )}
+                </div>
+              );
+            })}
           </div>
           <button
             type="button"
-            onClick={handleExportTheme}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-accent/40 bg-slate-900/70 px-3 py-2 text-sm font-medium text-accent transition hover:bg-accent/20 hover:text-slate-50"
+            onClick={handleAddTab}
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-accent/40 text-lg font-semibold text-accent transition hover:bg-accent/10"
+            aria-label="Add terminal tab"
           >
-            Export theme for oh-my-zsh
+            +
           </button>
-          <button
-            type="button"
-            onClick={openEditor}
-            className="mt-2 inline-flex items-center justify-center rounded-md border border-white/20 bg-slate-900/50 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-accent/60 hover:text-accent"
-          >
-            Customize theme
-          </button>
-        </aside>
-        <div className="relative flex flex-1 overflow-hidden">
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={
-                tab.id === activeId
-                  ? "flex h-full w-full"
-                  : "hidden h-full w-full"
-              }
-            >
-              <TerminalPanel themeId={tab.themeId} />
+        </div>
+        <div className="flex min-h-0 flex-1 bg-[#0b1220]">
+          <aside className="flex w-64 min-w-[16rem] flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
+            <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              Theme
+            </label>
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search themes"
+              className="mt-2 w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
+            />
+            <div className="mt-3 flex-1 overflow-y-auto pr-1">
+              {filteredThemes.length === 0 ? (
+                <p className="px-1 text-xs text-muted">No themes found</p>
+              ) : (
+                filteredThemes.map((theme) => {
+                  const isSelected = theme.id === activeThemeId;
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => handleThemeSelect(theme.id)}
+                      className={`mt-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition ${
+                        isSelected
+                          ? "bg-accent/20 text-slate-50"
+                          : "text-muted hover:bg-slate-800/70 hover:text-slate-100"
+                      }`}
+                    >
+                      <span className="truncate">{theme.label}</span>
+                      {isSelected ? (
+                        <span className="text-xs font-semibold text-accent">
+                          Active
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })
+              )}
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={handleExportTheme}
+              className="mt-4 inline-flex items-center justify-center rounded-md border border-accent/40 bg-slate-900/70 px-3 py-2 text-sm font-medium text-accent transition hover:bg-accent/20 hover:text-slate-50"
+            >
+              Export theme for oh-my-zsh
+            </button>
+            <button
+              type="button"
+              onClick={openEditor}
+              className="mt-2 inline-flex items-center justify-center rounded-md border border-white/20 bg-slate-900/50 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-accent/60 hover:text-accent"
+            >
+              Customize theme
+            </button>
+          </aside>
+          <div className="relative flex flex-1 overflow-hidden">
+            {tabs.map((tab) => (
+              <div
+                key={tab.id}
+                className={
+                  tab.id === activeId
+                    ? "flex h-full w-full"
+                    : "hidden h-full w-full"
+                }
+              >
+                <TerminalPanel themeId={tab.themeId} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
       {isEditorOpen && editorSeed ? (
         <ThemeEditor
           initialTheme={editorSeed}
@@ -486,7 +629,78 @@ const TerminalTabs = () => {
           onSave={handleEditorSave}
         />
       ) : null}
-    </div>
+
+      {showExportGuide ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 px-4 py-8 backdrop-blur mt-20">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-accent/30 bg-slate-900/95 p-8 text-sm text-slate-100 shadow-2xl">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-2xl font-semibold">
+                Apply “{activeTheme.label}” in oh-my-zsh
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExportGuide(false);
+                  setCopiedCommand(null);
+                }}
+                className="rounded-md border border-white/20 px-3 py-1 text-xs uppercase tracking-[0.2em] text-muted transition hover:border-white/40"
+              >
+                Close
+              </button>
+            </div>
+            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">
+              Follow the steps below. Commands include copy buttons on the right.
+            </p>
+            <div className="mt-5 space-y-4">
+              {instructionSections.map((section) => (
+                <section
+                  key={section.title}
+                  className="rounded-2xl border border-white/10 bg-slate-950/70 p-4"
+                >
+                  <h4 className="text-lg font-semibold text-slate-50">
+                    {section.title}
+                  </h4>
+                  {section.description ? (
+                    <p className="mt-1 text-sm text-slate-300">
+                      {section.description}
+                    </p>
+                  ) : null}
+                  <ul className="mt-3 space-y-2">
+                    {section.items.map((item, index) =>
+                      item.kind === "text" ? (
+                        <li
+                          key={`${section.title}-text-${index}`}
+                          className="text-sm text-slate-200"
+                        >
+                          {item.content}
+                        </li>
+                      ) : (
+                        <li
+                          key={`${section.title}-cmd-${index}`}
+                          className="flex items-center gap-3 rounded-xl bg-slate-950/90 px-3 py-2"
+                        >
+                          <code className="flex-1 truncate text-xs text-slate-100">
+                            {item.content}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyCommand(item.content)}
+                            className="rounded-md border border-white/20 px-2 py-1 text-xs font-semibold text-slate-100 transition hover:border-accent"
+                          >
+                            {copiedCommand === item.content ? "Copied!" : "Copy"}
+                          </button>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+    </>
   );
 };
 
