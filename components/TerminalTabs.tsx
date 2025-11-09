@@ -631,8 +631,8 @@ const TerminalTabs = () => {
       ) : null}
 
       {showExportGuide ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 px-4 py-8 backdrop-blur mt-20">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-accent/30 bg-slate-900/95 p-8 text-sm text-slate-100 shadow-2xl">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 px-4 py-8 backdrop-blur">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-accent/30 bg-slate-900/95 p-8 text-sm text-slate-100 shadow-2xl my-auto">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-2xl font-semibold">
                 Apply “{activeTheme.label}” in oh-my-zsh
