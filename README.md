@@ -2,15 +2,6 @@
 
 A browser-based playground that mimics an oh-my-zsh terminal using Next.js, React, and xterm.js. Everything runs locally in the browser, so you can experiment with colorful prompts, quick commands, and export the palette as a reusable oh-my-zsh theme.
 
-## Run the workspace locally
-1. Install dependencies and start the dev server:
-
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-2. Visit `http://localhost:3000` and interact with the terminal window.
 
 ## Exporting a theme to oh-my-zsh
 
