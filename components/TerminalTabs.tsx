@@ -9,10 +9,10 @@ import {
   DEFAULT_THEME_ID,
   TERMINAL_THEMES,
   getThemeById,
-  setCustomThemes as registerCustomThemes,
   type TerminalThemeId,
   type TerminalThemeConfig,
   type PromptComponentConfig,
+  type ThemeVariant,
 } from "./terminalThemes";
 import type { InstructionSection } from "./helpTypes";
 import { useThemeStore } from "./ThemeContext";
@@ -253,6 +253,9 @@ const TerminalTabs = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { customThemes, setCustomThemes, setInstructionSections } =
     useThemeStore();
+  const [variantFilter, setVariantFilter] = useState<ThemeVariant | "all">(
+    "all"
+  );
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorSeed, setEditorSeed] = useState<TerminalThemeConfig | null>(
     null
@@ -261,10 +264,6 @@ const TerminalTabs = () => {
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const commandCopyTimeoutRef = useRef<number | null>(null);
   const idCounter = useRef(2);
-
-  useEffect(() => {
-    registerCustomThemes(customThemes);
-  }, [customThemes]);
 
   const handleAddTab = () => {
     setTabs((prev) => {
@@ -368,13 +367,15 @@ const TerminalTabs = () => {
 
   const filteredThemes = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) {
-      return availableThemes;
-    }
-    return availableThemes.filter((theme) =>
-      theme.label.toLowerCase().includes(query)
-    );
-  }, [searchTerm, availableThemes]);
+    return availableThemes.filter((theme) => {
+      const matchesQuery = query
+        ? theme.label.toLowerCase().includes(query)
+        : true;
+      const matchesVariant =
+        variantFilter === "all" ? true : theme.variant === variantFilter;
+      return matchesQuery && matchesVariant;
+    });
+  }, [searchTerm, availableThemes, variantFilter]);
 
   const handleThemeSelect = (themeId: TerminalThemeId) => {
     if (!activeTab) {
@@ -427,7 +428,6 @@ const TerminalTabs = () => {
       } else {
         next[index] = theme;
       }
-      registerCustomThemes(next);
       return next;
     });
     setTabs((prev) =>
@@ -553,15 +553,29 @@ const TerminalTabs = () => {
         </div>
         <div className="flex min-h-0 flex-1 bg-[#0b1220]">
           <aside className="flex w-64 min-w-[16rem] flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
-            <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-              Theme
-            </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            Theme
+          </label>
+          <div className="mt-2 flex gap-2">
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search themes"
-              className="mt-2 w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
+              className="w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
             />
+            <select
+              value={variantFilter}
+              onChange={(event) =>
+                setVariantFilter(event.target.value as ThemeVariant | "all")
+              }
+              className="rounded-md border border-accent/30 bg-slate-950/60 px-2 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
+            >
+              <option value="all">All</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="contrast">Contrast</option>
+            </select>
+          </div>
             <div className="mt-3 flex-1 overflow-y-auto pr-1">
               {filteredThemes.length === 0 ? (
                 <p className="px-1 text-xs text-muted">No themes found</p>

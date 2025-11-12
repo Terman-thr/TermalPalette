@@ -24,11 +24,11 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
    If either command reports the oh-my-zsh directory (typically `~/.oh-my-zsh`) or prints a version, you are good to go. Otherwise install oh-my-zsh via the instructions at [ohmyz.sh](https://ohmyz.sh/#install) before continuing.
 
 ### 2. Locate the exported file
-1. Export a theme from the browser UI (e.g. `robbyrussell.zsh-theme`). Your browser saves it in the default downloads folder.
+1. Export a theme from the browser UI (e.g. `aurora.zsh-theme`). Your browser saves it in the default downloads folder.
 2. (Optional) Inspect the file to see the generated prompt and color palette:
 
    ```bash
-   head ~/Downloads/robbyrussell.zsh-theme
+   head ~/Downloads/aurora.zsh-theme
    ```
 
 ### 3. Move the theme into oh-my-zsh's custom directory
@@ -41,14 +41,14 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
 2. Move or copy the downloaded file:
 
    ```bash
-   mv ~/Downloads/robbyrussell.zsh-theme ~/.oh-my-zsh/custom/themes/
+   mv ~/Downloads/aurora.zsh-theme ~/.oh-my-zsh/custom/themes/
    ```
 
 3. Finder vs Nautilus: on macOS you can run `open ~/.oh-my-zsh`, while on Linux you can run `xdg-open ~/.oh-my-zsh` to open the folder graphically. The remaining steps are identical afterward.
 4. Confirm the theme is present:
 
    ```bash
-   ls ~/.oh-my-zsh/custom/themes | grep robbyrussell
+   ls ~/.oh-my-zsh/custom/themes | grep aurora
    ```
 
 ### 4. Activate the theme via `~/.zshrc`
@@ -62,7 +62,7 @@ Use the "Export theme for oh-my-zsh" button in the sidebar to download the curre
 2. Update the `ZSH_THEME` line with the filename **without** the `.zsh-theme` extension:
 
    ```bash
-   ZSH_THEME="robbyrussell"
+   ZSH_THEME="aurora"
    ```
 
    If you keep custom files outside `~/.oh-my-zsh/custom`, set `ZSH_CUSTOM` earlier in the file so oh-my-zsh knows where to search.

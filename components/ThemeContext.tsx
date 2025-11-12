@@ -1,11 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-
+import { createContext, useContext, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { InstructionSection } from "./helpTypes";
-import type { TerminalThemeConfig } from "./terminalThemes";
+import {
+  setCustomThemes as registerCustomThemes,
+  type TerminalThemeConfig,
+} from "./terminalThemes";
 
 type ThemeContextValue = {
   customThemes: TerminalThemeConfig[];
@@ -25,6 +27,10 @@ export const ThemeProvider = ({
   const [instructionSections, setInstructionSections] = useState<
     InstructionSection[]
   >([]);
+
+  useEffect(() => {
+    registerCustomThemes(customThemes);
+  }, [customThemes]);
 
   return (
     <ThemeContext.Provider

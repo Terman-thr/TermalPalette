@@ -313,6 +313,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
       ...initialTheme,
       id,
       label: safeName,
+      variant: initialTheme.variant,
       promptComponents: sanitizedComponents,
       promptSuffix: buildSuffix(suffixText, suffixHex),
       theme: {
