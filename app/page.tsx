@@ -38,10 +38,7 @@ const PageShell = () => {
                   <code className="font-mono text-accent">clear</code>
                 </li>
                 <li>
-                  <code className="font-mono text-accent">vim notes.txt</code>
-                </li>
-                <li>
-                  <code className="font-mono text-accent">theme</code>
+                  <code className="font-mono text-accent">ls</code>
                 </li>
               </ul>
               <a

@@ -13,7 +13,6 @@ import {
   type PromptComponentConfig,
   type TerminalThemeId,
   type TerminalThemeConfig,
-  isThemeId,
 } from "./terminalThemes";
 
 class PseudoShell {
@@ -34,6 +33,12 @@ class PseudoShell {
     fullPath: "/Users/<your-name>/playground",
     gitBranch: "main",
   };
+  private readonly workspaceEntries = [
+    { name: "components", type: "dir" },
+    { name: "public", type: "dir" },
+    { name: "README.md", type: "file" },
+    { name: "package.json", type: "file" },
+  ];
 
   constructor(term: Terminal, initialThemeId: TerminalThemeId = DEFAULT_THEME_ID) {
     this.term = term;
@@ -278,6 +283,17 @@ class PseudoShell {
     );
   }
 
+  private renderWorkspaceEntries() {
+    const dirColor = "\u001b[38;5;81m";
+    const fileColor = "\u001b[38;5;152m";
+    const reset = "\u001b[0m";
+    this.workspaceEntries.forEach((entry) => {
+      const color = entry.type === "dir" ? dirColor : fileColor;
+      const suffix = entry.type === "dir" ? "/" : "";
+      this.term.writeln(`  ${color}${entry.name}${suffix}${reset}`);
+    });
+  }
+
   private runCommand(raw: string) {
     const trimmed = raw.trim();
     if (!trimmed) {
@@ -292,30 +308,17 @@ class PseudoShell {
     switch (binary) {
       case "help":
         this.term.writeln("Available commands:");
-        this.term.writeln("  help        Show this list.");
-        this.term.writeln("  clear       Clear the terminal viewport.");
-        this.term.writeln("  theme       Cycle through accent themes.");
-        this.term.writeln("  vim [file]  Open the simulated vim environment.");
-        this.term.writeln("  about       Learn what powers this workspace.");
+        this.term.writeln("  help         Show this list.");
+        this.term.writeln("  clear        Clear the terminal viewport.");
+        this.term.writeln("  ls           List workspace directories/files.");
+        this.term.writeln("  about        Learn what powers this workspace.");
         break;
       case "clear":
         this.term.clear();
         this.prompt(false);
         return;
-      case "theme":
-        if (rest[0]) {
-          const desired = rest[0].toLowerCase();
-          if (isThemeId(desired)) {
-            this.setTheme(desired, { clear: true });
-          } else {
-            this.term.writeln(`Unknown theme: ${desired}`);
-          }
-        } else {
-          this.cycleTheme();
-        }
-        break;
-      case "vim":
-        this.launchVim(rest[0]);
+      case "ls":
+        this.renderWorkspaceEntries();
         return;
       case "about":
         this.term.writeln(
