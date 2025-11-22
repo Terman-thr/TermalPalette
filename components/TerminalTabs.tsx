@@ -256,6 +256,9 @@ const TerminalTabs = () => {
   const [variantFilter, setVariantFilter] = useState<ThemeVariant | "all">(
     "all"
   );
+  const [accessibilityFilter, setAccessibilityFilter] = useState<
+    "all" | "cb-friendly" | "protanopia" | "deuteranopia" | "tritanopia"
+  >("all");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorSeed, setEditorSeed] = useState<TerminalThemeConfig | null>(
     null
@@ -373,9 +376,16 @@ const TerminalTabs = () => {
         : true;
       const matchesVariant =
         variantFilter === "all" ? true : theme.variant === variantFilter;
-      return matchesQuery && matchesVariant;
+      const accessibilityTags = theme.accessibilityTags ?? [];
+      const matchesAccessibility =
+        accessibilityFilter === "all"
+          ? true
+          : accessibilityFilter === "cb-friendly"
+          ? accessibilityTags.length > 0
+          : accessibilityTags.includes(accessibilityFilter);
+      return matchesQuery && matchesVariant && matchesAccessibility;
     });
-  }, [searchTerm, availableThemes, variantFilter]);
+  }, [searchTerm, availableThemes, variantFilter, accessibilityFilter]);
 
   const handleThemeSelect = (themeId: TerminalThemeId) => {
     if (!activeTab) {
@@ -552,31 +562,54 @@ const TerminalTabs = () => {
           </button>
         </div>
         <div className="flex min-h-0 flex-1 bg-[#0b1220]">
-          <aside className="flex w-64 min-w-[16rem] flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
+          <aside className="flex w-64 min-w-[16rem] h-shrink flex-col border-r border-accent/25 bg-slate-900/70 px-3 py-4">
           <label className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             Theme
           </label>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-col gap-2">
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search themes"
               className="w-full rounded-md border border-accent/30 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
             />
-            <select
-              value={variantFilter}
-              onChange={(event) =>
-                setVariantFilter(event.target.value as ThemeVariant | "all")
-              }
-              className="rounded-md border border-accent/30 bg-slate-950/60 px-2 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
-            >
-              <option value="all">All</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="contrast">Contrast</option>
-            </select>
+            <div className="flex flex-col gap-2">
+              <select
+                value={variantFilter}
+                onChange={(event) =>
+                  setVariantFilter(event.target.value as ThemeVariant | "all")
+                }
+                className="flex-1 rounded-md border border-accent/30 bg-slate-950/60 px-2 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
+              >
+                <option value="all">All tones</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="contrast">Contrast</option>
+              </select>
+              <select
+                value={accessibilityFilter}
+                onChange={(event) =>
+                  setAccessibilityFilter(
+                    event.target.value as
+                      | "all"
+                      | "cb-friendly"
+                      | "protanopia"
+                      | "deuteranopia"
+                      | "tritanopia"
+                  )
+                }
+                className="flex-1 rounded-md border border-accent/30 bg-slate-950/60 px-2 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
+              >
+                <option value="all">All palettes</option>
+                <option value="cb-friendly">Color-blind friendly</option>
+                <option value="protanopia">Protanopia</option>
+                <option value="deuteranopia">Deuteranopia</option>
+                <option value="tritanopia">Tritanopia</option>
+              </select>
+            </div>
           </div>
-            <div className="mt-3 flex-1 overflow-y-auto pr-1">
+          <div>
+            <div className="mt-3 flex-1 max-h-72 overflow-y-auto pr-1">
               {filteredThemes.length === 0 ? (
                 <p className="px-1 text-xs text-muted">No themes found</p>
               ) : (
@@ -603,7 +636,8 @@ const TerminalTabs = () => {
                   );
                 })
               )}
-            </div>
+              </div>
+          </div>
             <button
               type="button"
               onClick={handleExportTheme}
