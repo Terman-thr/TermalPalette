@@ -495,19 +495,25 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                 className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
                               />
                             </label>
-                            <label className="text-sm text-slate-200">
-                              Color
-                              <input
-                                type="color"
-                                value={component.hexColor}
-                                onChange={(event) =>
-                                  updateComponent(component.id, {
-                                    hexColor: event.target.value,
-                                  })
-                                }
-                                className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
-                              />
-                            </label>
+                            {component.type !== "emoji" ? (
+                              <label className="text-sm text-slate-200">
+                                Color
+                                <input
+                                  type="color"
+                                  value={component.hexColor}
+                                  onChange={(event) =>
+                                    updateComponent(component.id, {
+                                      hexColor: event.target.value,
+                                    })
+                                  }
+                                  className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                                />
+                              </label>
+                            ) : (
+                              <div className="flex items-center text-sm text-slate-400">
+                                Color locked for emoji
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
