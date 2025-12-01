@@ -217,7 +217,9 @@ const ensureValueForType = (
 
 const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
   const suffixInfo = parseSuffix(initialTheme.promptSuffix);
-  const [themeName, setThemeName] = useState(initialTheme.label);
+  const [themeName, setThemeName] = useState(
+    `Custom ${initialTheme.label}`
+  );
   const [components, setComponents] = useState<EditableComponent[]>(
     initialTheme.promptComponents.map((component) =>
       createEditableComponent(component, component.type)
@@ -294,6 +296,23 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
   };
 
   const previewComponents = useMemo(() => components, [components]);
+
+  const handleReset = () => {
+    const suffixInfo = parseSuffix(initialTheme.promptSuffix);
+    setThemeName(initialTheme.label);
+    setComponents(
+      initialTheme.promptComponents.map((component) =>
+        createEditableComponent(component, component.type)
+      )
+    );
+    setSuffixText(suffixInfo.text);
+    setSuffixHex(suffixInfo.hex);
+    setPalette({
+      background: initialTheme.theme.background ?? "#0b1220",
+      foreground: initialTheme.theme.foreground ?? "#cbd5f5",
+      cursor: initialTheme.theme.cursor ?? "#7aa2f7",
+    });
+  };
 
   const handleSave = () => {
     const sanitizedComponents: PromptComponentConfig[] = components.map(
@@ -599,21 +618,30 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-4 sm:flex-row sm:justify-between">
           <button
             type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40"
+            onClick={handleReset}
+            className="rounded-lg border border-orange-400/40 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-400/10"
           >
-            Cancel
+            Reset
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="rounded-lg border border-accent/60 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/30"
-          >
-            Save theme
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="rounded-lg border border-accent/60 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/30"
+            >
+              Save theme
+            </button>
+          </div>
         </div>
       </div>
     </div>
