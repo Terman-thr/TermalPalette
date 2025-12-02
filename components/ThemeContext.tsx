@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { InstructionSection } from "./helpTypes";
@@ -23,14 +23,23 @@ export const ThemeProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [customThemes, setCustomThemes] = useState<TerminalThemeConfig[]>([]);
+  const [customThemes, setCustomThemesState] = useState<TerminalThemeConfig[]>(
+    []
+  );
   const [instructionSections, setInstructionSections] = useState<
     InstructionSection[]
   >([]);
 
-  useEffect(() => {
-    registerCustomThemes(customThemes);
-  }, [customThemes]);
+  const setCustomThemes = useCallback<
+    Dispatch<SetStateAction<TerminalThemeConfig[]>>
+  >((next) => {
+    setCustomThemesState((prev) => {
+      const resolved =
+        typeof next === "function" ? next(prev) : (next as TerminalThemeConfig[]);
+      registerCustomThemes(resolved);
+      return resolved;
+    });
+  }, []);
 
   return (
     <ThemeContext.Provider

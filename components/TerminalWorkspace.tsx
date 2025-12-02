@@ -14,6 +14,7 @@ import {
   type TerminalThemeId,
   type TerminalThemeConfig,
 } from "./terminalThemes";
+import { useThemeStore } from "./ThemeContext";
 
 class PseudoShell {
   private readonly term: Terminal;
@@ -409,14 +410,22 @@ const TerminalWorkspace = ({ themeId }: TerminalWorkspaceProps) => {
   const shellRef = useRef<PseudoShell | null>(null);
   const [term, setTerm] = useState<Terminal | null>(null);
   const latestThemeIdRef = useRef<TerminalThemeId>(themeId);
+  const lastAppliedThemeIdRef = useRef<TerminalThemeId>(themeId);
+  const { customThemes } = useThemeStore();
 
   useEffect(() => {
     latestThemeIdRef.current = themeId;
     const shell = shellRef.current;
     if (shell) {
-      shell.setTheme(themeId, { silent: true, clear: true, prompt: true });
+      const hasThemeChanged = lastAppliedThemeIdRef.current !== themeId;
+      shell.setTheme(themeId, {
+        silent: true,
+        clear: hasThemeChanged,
+        prompt: true,
+      });
+      lastAppliedThemeIdRef.current = themeId;
     }
-  }, [themeId]);
+  }, [themeId, customThemes]);
 
   useEffect(() => {
     const terminal = new Terminal({

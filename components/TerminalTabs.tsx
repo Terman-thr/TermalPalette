@@ -353,7 +353,7 @@ const TerminalTabs = () => {
   const activeThemeId = activeTab?.themeId ?? DEFAULT_THEME_ID;
   const activeTheme = useMemo(
     () => getThemeById(activeThemeId),
-    [activeThemeId]
+    [activeThemeId, customThemes]
   );
   const instructionSections = useMemo(
     () => buildInstructionSections(activeTheme),
