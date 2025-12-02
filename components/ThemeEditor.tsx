@@ -529,9 +529,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                 />
                               </label>
                             ) : (
-                              <div className="flex items-center text-sm text-slate-400">
-                                Color locked for emoji
-                              </div>
+                              <span />
                             )}
                           </div>
                         </div>
