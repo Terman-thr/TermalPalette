@@ -91,3 +91,63 @@ Select any terminal tab and click **Customize theme** to open the editor overlay
 3. Choose a prompt-ending symbol (including emoji) and tweak the terminal background/foreground/cursor colors used in the preview.
 
 Save your edits to add the new theme to the selection list instantly. The terminal switches to it right away, and you can export it as an oh-my-zsh theme just like the built-in presets.
+
+
+### Troubleshooting Guide
+
+Will the theme run without oh-my-zsh?
+- No, the themes will not function without oh-my-zsh installation.
+
+How to install oh-my-zsh?
+- step 1: open linux
+- step 2: use below command for installation dependencies
+   ```bash
+   sudo apt update && sudo apt install zsh git curl -y
+   ```
+- step 3: use below command to check if installtion is successful
+   ```bash
+   zsh --version
+   ```
+- step 4: use below command for oh-my-zsh installation
+   ```bash
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+   ```
+- step 5: a prompt will come out [Do you want to change your default shell to zsh? [Y/n]] 
+enter "Y"
+
+Why don't I see the changes made to my laptop?
+- Reload/open a new terminal to see changes
+
+How to activate via ~/.zshrc using an example theme:
+- step 1: use command to open zshrc file
+   ```bash
+   nano ~/.zshrc
+   ```
+- step 2: Use arrow keys to navigate to the line of ZSH_THEME="robbyrussell".   
+
+- step 3: Replace "robbyrussell" with your theme.
+ex. 
+before: ZSH_THEME="robbyrussell"
+after: ZSH_THEME="deuter-dark"
+
+Note:to find what to put in ZSH_THEME, look at the file downloaded in your downloads and copy paste the part before .zsh-theme.
+ex. 
+file downloaded: deuter-dark.zsh-theme
+ZSH_THEME="deuter-dark"
+file downloaded: midnight.zsh-theme
+ZSH_THEME="midnight"
+
+- step 4: Ctrl + O then press the Enter key to write the changes on to the file
+- step 5: Ctrl + X to exit file.
+- step 6: apply below command to see changes
+   ```bash
+   source ~/.zshrc
+   ```
+
+Why do I see this error: "[oh-my-zsh] theme 'deuter-dark' not found"?
+- make sure you copy paste/phyically move your theme file into the themes folder where oh-my-zsh is installed in ( under \.oh-my-zsh\custom\themes).
+
+
+
+
+
