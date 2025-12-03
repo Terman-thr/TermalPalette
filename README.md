@@ -112,7 +112,7 @@ How to install oh-my-zsh?
    ```bash
    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
    ```
-- step 5: a prompt will come out [Do you want to change your default shell to zsh? [Y/n]] 
+- step 5: a prompt will come out [Do you want to change your default shell to zsh? [Y/n]]:  
 enter "Y"
 
 Why don't I see the changes made to my laptop?
@@ -125,17 +125,17 @@ How to activate via ~/.zshrc using an example theme:
    ```
 - step 2: Use arrow keys to navigate to the line of ZSH_THEME="robbyrussell".   
 
-- step 3: Replace "robbyrussell" with your theme.
-ex. 
-before: ZSH_THEME="robbyrussell"
-after: ZSH_THEME="deuter-dark"
+- step 3: Replace "robbyrussell" with your theme.  
+ex.   
+before: ZSH_THEME="robbyrussell"  
+after: ZSH_THEME="deuter-dark"  
 
-Note:to find what to put in ZSH_THEME, look at the file downloaded in your downloads and copy paste the part before .zsh-theme.
-ex. 
-file downloaded: deuter-dark.zsh-theme
-ZSH_THEME="deuter-dark"
-file downloaded: midnight.zsh-theme
-ZSH_THEME="midnight"
+Note:to find what to put in ZSH_THEME, look at the file downloaded in your downloads and copy paste the part before .zsh-theme.  
+ex.   
+file downloaded: deuter-dark.zsh-theme  
+ZSH_THEME="deuter-dark"  
+file downloaded: midnight.zsh-theme  
+ZSH_THEME="midnight"  
 
 - step 4: Ctrl + O then press the Enter key to write the changes on to the file
 - step 5: Ctrl + X to exit file.
