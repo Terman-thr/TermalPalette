@@ -178,6 +178,12 @@ const buildInstructionSections = (
       description:
         "Confirm zsh and oh-my-zsh are ready before applying the exported theme.",
       items: [
+        {
+          kind: "text",
+          content:
+            "If zsh is not installed, visit https://www.zsh.org and follow the install guide.",
+        },
+        { kind: "command", content: "https://www.zsh.org/" },
         { kind: "command", content: "zsh --version" },
         { kind: "command", content: "echo $USER" },
         { kind: "command", content: "echo $ZSH" },
@@ -207,8 +213,8 @@ const buildInstructionSections = (
       items: [
         { kind: "command", content: "nano ~/.zshrc" },
         {
-          kind: "text",
-          content: `Inside the file ensure: ZSH_THEME=\"${theme.id}\"`,
+          kind: "command",
+          content: `ZSH_THEME=\"${theme.id}\"`,
         },
         { kind: "command", content: "source ~/.zshrc" },
       ],
