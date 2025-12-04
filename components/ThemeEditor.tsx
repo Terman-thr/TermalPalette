@@ -347,38 +347,50 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 px-4 py-8 backdrop-blur">
-      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-accent/30 bg-slate-900/95 shadow-2xl">
-        <div className="border-b border-white/10 bg-slate-900/98 px-6 py-6">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/80 px-4 py-8 backdrop-blur">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(56,189,248,0.08),transparent_32%),radial-gradient(circle_at_85%_10%,rgba(244,114,182,0.12),transparent_30%),radial-gradient(circle_at_50%_80%,rgba(94,234,212,0.08),transparent_26%)]" />
+      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-accent/30 bg-slate-900/95 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
+        <div className="relative border-b border-white/10 bg-gradient-to-r from-slate-900/98 via-slate-900/95 to-slate-900/98 px-6 py-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(94,234,212,0.12),transparent_35%)]" />
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <h2 className="text-2xl font-semibold text-slate-50">
                 Theme editor
               </h2>
+              <p className="text-sm text-slate-300">
+                Adjust your prompt, palette, and ending mark with immediate feedback. Hover elements to see microinteractions.
+              </p>
             </div>
             <label className="text-sm font-medium text-slate-200">
               Theme name
               <input
                 value={themeName}
                 onChange={(event) => setThemeName(event.target.value)}
-                className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-base text-slate-50 placeholder:text-muted focus:border-accent focus:outline-none"
+                className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-base text-slate-50 shadow-inner shadow-black/20 placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
                 placeholder="Give your theme a memorable name"
               />
             </label>
-            <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-5 shadow-xl backdrop-blur">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-xl font-semibold text-slate-50">
-                  Prompt preview
-                </h3>
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 p-5 shadow-xl shadow-cyan-500/10 backdrop-blur">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(56,189,248,0.12),transparent_35%),radial-gradient(circle_at_80%_60%,rgba(244,114,182,0.12),transparent_40%)]" />
+              <div className="relative flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                    Live prompt
+                  </div>
+                  <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-200">
+                    {initialTheme.variant} mode
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.18)]" />
                   Live view
-                </span>
+                </div>
               </div>
               <div
-                className="mt-4 overflow-hidden rounded-2xl border border-slate-800"
+                className="mt-4 overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-inner shadow-black/40"
                 style={{ background: palette.background }}
               >
-                <div className="bg-black/30 px-6 py-5">
+                <div className="bg-black/25 px-6 py-5">
                   <div
                     className="font-mono text-lg leading-relaxed md:text-xl"
                     style={{ color: palette.foreground }}
@@ -404,30 +416,41 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <div className="space-y-6">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h3 className="text-lg font-semibold text-slate-100">
                 Prompt components
               </h3>
-              <div className="h-px flex-1 bg-white/15" />
+              <span className="text-sm text-muted">
+                Reorder with arrows; hover fields for subtle glow feedback.
+              </span>
+              <div className="h-px flex-1 bg-white/10" />
               <button
                 type="button"
                 onClick={handleAddComponent}
-                className="rounded-md border border-accent/40 px-3 py-1.5 text-sm font-medium text-accent transition hover:bg-accent/10"
+                className="rounded-md border border-accent/50 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent shadow-[0_0_0_1px_rgba(56,189,248,0.35)] transition hover:scale-[1.01] hover:bg-accent/20 hover:shadow-[0_0_0_2px_rgba(56,189,248,0.35)]"
               >
                 Add component
               </button>
             </div>
             <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
               <div className="space-y-4">
-                <div className="space-y-3 rounded-2xl border border-white/5 bg-slate-950/30 p-2 pr-3">
-                  <div className="max-h-[50vh] space-y-3 pr-2">
+                <div className="space-y-3 rounded-2xl border border-white/5 bg-slate-950/40 p-3 pr-3 shadow-inner shadow-black/30">
+                  <div className="max-h-[50vh] space-y-3 pr-1">
                     {components.map((component, index) => (
                       <div
                         key={component.id}
-                        className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
+                        className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950/60 via-slate-900/70 to-slate-950/50 p-4 shadow-lg shadow-black/30 transition duration-150 hover:border-accent/60 hover:shadow-cyan-500/10"
                       >
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-4">
                           <div className="flex flex-wrap items-center gap-3">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                              {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                              <span
+                                className="h-2.5 w-2.5 rounded-full shadow-[0_0_0_4px_rgba(255,255,255,0.06)]"
+                                style={{ background: component.hexColor }}
+                                aria-hidden
+                              />
+                            </span>
                             <select
                               value={component.type}
                               onChange={(event) =>
@@ -435,7 +458,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                   type: event.target.value as PromptComponentType,
                                 })
                               }
-                              className="flex-1 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                              className="flex-1 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 shadow-inner shadow-black/30 focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none"
                             >
                               {COMPONENT_OPTIONS.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -446,7 +469,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
+                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-accent"
                                 onClick={() => moveComponent(component.id, -1)}
                                 disabled={index === 0}
                               >
@@ -454,7 +477,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                               </button>
                               <button
                                 type="button"
-                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent"
+                                className="rounded-md border border-white/10 px-2 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-accent"
                                 onClick={() => moveComponent(component.id, 1)}
                                 disabled={index === components.length - 1}
                               >
@@ -464,7 +487,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                             <button
                               type="button"
                               onClick={() => handleRemoveComponent(component.id)}
-                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-rose-300 transition hover:border-rose-400"
+                              className="rounded-md border border-white/10 px-2 py-1 text-xs text-rose-200 transition hover:border-rose-400 hover:text-rose-200"
                             >
                               Remove
                             </button>
@@ -485,7 +508,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                     ? "e.g. ✨"
                                     : "Custom text"
                                 }
-                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 shadow-inner shadow-black/30 transition focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none"
                               />
                             </label>
                           )}
@@ -499,7 +522,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                     prefix: event.target.value,
                                   })
                                 }
-                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 shadow-inner shadow-black/30 transition focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none"
                               />
                             </label>
                             <label className="text-sm text-slate-200">
@@ -511,7 +534,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                                     suffix: event.target.value,
                                   })
                                 }
-                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                                className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 shadow-inner shadow-black/30 transition focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none"
                               />
                             </label>
                             {component.type !== "emoji" ? (
@@ -536,20 +559,23 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                       </div>
                     ))}
                   </div>
-                </div>
               </div>
+            </div>
               <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950/60 via-slate-900/70 to-slate-950/50 p-4 shadow-inner shadow-black/30">
                   <h3 className="text-lg font-semibold text-slate-100">
                     Prompt ending
                   </h3>
+                  <p className="mt-1 text-xs text-slate-300">
+                    Tweak the closing symbol and color; it anchors the cursor zone.
+                  </p>
                   <div className="mt-3 space-y-3">
                     <label className="text-sm text-slate-200">
                       Symbol / emoji
                       <input
                         value={suffixText}
                         onChange={(event) => setSuffixText(event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 focus:border-accent focus:outline-none"
+                        className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 shadow-inner shadow-black/30 transition focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none"
                       />
                     </label>
                     <label className="text-sm text-slate-200">
@@ -558,15 +584,47 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                         type="color"
                         value={suffixHex}
                         onChange={(event) => setSuffixHex(event.target.value)}
-                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70 shadow-inner shadow-black/30 transition hover:border-accent/50"
                       />
                     </label>
+                    <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-black/30 px-3 py-2 text-xs text-slate-200">
+                      <span
+                        className="h-3 w-3 rounded-full shadow-[0_0_0_4px_rgba(148,163,184,0.25)]"
+                        style={{ background: suffixHex }}
+                        aria-hidden
+                      />
+                      <span className="uppercase tracking-[0.2em] text-muted">
+                        Preview
+                      </span>
+                      <code className="rounded bg-white/5 px-2 py-1 text-[11px] text-slate-100">
+                        {buildSuffix(suffixText, suffixHex).trim()}
+                      </code>
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950/60 via-slate-900/70 to-slate-950/50 p-4 shadow-inner shadow-black/30">
                   <h3 className="text-lg font-semibold text-slate-100">
                     Terminal palette
                   </h3>
+                  <p className="mt-1 text-xs text-slate-300">
+                    Match your prompt colors with the terminal backdrop and cursor glow.
+                  </p>
+                  <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-xs text-slate-200">
+                    {(["background", "foreground", "cursor"] as const).map(
+                      (key) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <span
+                            className="h-3 w-3 rounded-full shadow-[0_0_0_4px_rgba(148,163,184,0.25)]"
+                            style={{ background: palette[key] }}
+                            aria-hidden
+                          />
+                          <span className="capitalize text-[11px] text-muted">
+                            {key}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
                   <div className="mt-3 space-y-3">
                     <label className="text-sm text-slate-200">
                       Background
@@ -579,7 +637,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                             background: event.target.value,
                           }))
                         }
-                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70 shadow-inner shadow-black/30 transition hover:border-accent/50"
                       />
                     </label>
                     <label className="text-sm text-slate-200">
@@ -593,7 +651,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                             foreground: event.target.value,
                           }))
                         }
-                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70 shadow-inner shadow-black/30 transition hover:border-accent/50"
                       />
                     </label>
                     <label className="text-sm text-slate-200">
@@ -607,7 +665,7 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
                             cursor: event.target.value,
                           }))
                         }
-                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70"
+                        className="mt-1 h-10 w-full rounded-md border border-white/20 bg-slate-900/70 shadow-inner shadow-black/30 transition hover:border-accent/50"
                       />
                     </label>
                   </div>
@@ -616,11 +674,11 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-4 sm:flex-row sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-white/10 bg-slate-900/90 px-6 py-4 shadow-inner shadow-black/30 sm:flex-row sm:justify-between">
           <button
             type="button"
             onClick={handleReset}
-            className="rounded-lg border border-orange-400/40 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-400/10"
+            className="rounded-lg border border-orange-400/50 bg-orange-400/10 px-4 py-2 text-sm font-medium text-orange-200 shadow-[0_0_0_1px_rgba(251,146,60,0.35)] transition hover:scale-[1.01] hover:bg-orange-400/20"
           >
             Reset
           </button>
@@ -628,14 +686,14 @@ const ThemeEditor = ({ initialTheme, onCancel, onSave }: ThemeEditorProps) => {
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40"
+              className="rounded-lg border border-white/25 bg-white/5 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/40 hover:bg-white/10"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="rounded-lg border border-accent/60 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/30"
+              className="rounded-lg border border-accent/70 bg-gradient-to-r from-accent/30 to-cyan-400/25 px-4 py-2 text-sm font-semibold text-accent shadow-[0_10px_35px_-15px_rgba(56,189,248,0.75)] transition hover:scale-[1.01] hover:shadow-[0_14px_40px_-12px_rgba(56,189,248,0.9)]"
             >
               Save theme
             </button>
