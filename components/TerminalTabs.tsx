@@ -607,10 +607,10 @@ const TerminalTabs = () => {
                 className="flex-1 rounded-md border border-accent/30 bg-slate-950/60 px-2 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
               >
                 <option value="all">All palettes</option>
-                <option value="cb-friendly">Color-blind friendly</option>
-                <option value="protanopia">Protanopia</option>
-                <option value="deuteranopia">Deuteranopia</option>
-                <option value="tritanopia">Tritanopia</option>
+                <option value="cb-friendly">🌈 Color-blind friendly</option>
+                <option value="protanopia">🟥 Protanopia</option>
+                <option value="deuteranopia">🟦 Deuteranopia</option>
+                <option value="tritanopia">🟪 Tritanopia</option>
               </select>
             </div>
           </div>
